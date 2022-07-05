@@ -73,11 +73,12 @@ class DriverProfileTransformer extends Transformer
             'no_of_ratings' => $user->no_of_ratings,
             'timezone'=>$user->timezone,
             'refferal_code'=>$user->user->refferal_code,
-            'map_key'=>env('GOOGLE_MAP_KEY'),
+            //'map_key'=>get_settings('google_map_key'),
             'company_key'=>$user->user->company_key,
             'show_instant_ride'=>false,
             'country_id'=>$user->user->countryDetail->id,
-            'currency_symbol' => $user->user->countryDetail->currency_symbol
+            'currency_symbol' => $user->user->countryDetail->currency_symbol,
+            'mqtt_ip'=>'54.172.163.200'
         ];
 
         $current_date = Carbon::now();
@@ -110,9 +111,22 @@ class DriverProfileTransformer extends Transformer
         $wallet_balance= $driver_wallet?$driver_wallet->amount_balance:0;
 
          $minimum_balance = get_settings(Settings::DRIVER_WALLET_MINIMUM_AMOUNT_TO_GET_ORDER);
-            if ($minimum_balance > $wallet_balance) {
+
+            if($minimum_balance !=0){
+                if ($minimum_balance > $wallet_balance) {
+
+                $user->active = false;
+
+                $user->save();
+                
+                $params['active'] = false;
+
+
                 $low_balance = true;
             }
+                
+            }
+            
 
             $params['low_balance'] = $low_balance;
 

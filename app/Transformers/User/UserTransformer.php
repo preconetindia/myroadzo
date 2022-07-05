@@ -57,15 +57,26 @@ class UserTransformer extends Transformer
             'refferal_code'=>$user->refferal_code,
             'currency_code'=>$user->countryDetail->currency_code,
             'currency_symbol'=>$user->countryDetail->currency_symbol,
-            'map_key'=>env('GOOGLE_MAP_KEY'),
-            'show_rental_ride'=>false,
+            //'map_key'=>get_settings('google_map_key'),
+            'mqtt_ip'=>'54.172.163.200',
+            'show_rental_ride'=>true,
+            'show_ride_later_feature'=>true,
             // 'created_at' => $user->converted_created_at->toDateTimeString(),
             // 'updated_at' => $user->converted_updated_at->toDateTimeString(),
         ];
 
+        if(get_settings('show_rental_ride_feature')=='0'){
+            $params['show_rental_ride'] = false;  
+        }
+        
+        if(get_settings('show_ride_later_feature')=='0'){
+            $params['show_ride_later_feature'] = false;  
+        }
+        
         $referral_comission = get_settings('referral_commision_for_user');
         $referral_comission_string = 'Refer a friend and earn'.$user->countryDetail->currency_symbol.''.$referral_comission;
         $params['referral_comission_string'] = $referral_comission_string;
+
         return $params;
     }
 
@@ -122,6 +133,7 @@ class UserTransformer extends Transformer
     {
         $request = Sos::select('id', 'name', 'number', 'user_type', 'created_by')
         ->where('created_by', auth()->user()->id)
+        ->orWhere('user_type', 'admin')
         ->orderBy('created_at', 'Desc')
         ->companyKey()->get();
 

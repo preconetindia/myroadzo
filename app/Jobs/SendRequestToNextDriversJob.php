@@ -59,11 +59,11 @@ class SendRequestToNextDriversJob implements ShouldQueue
                 
                 // dispatch(new NotifyViaSocket('transfer_msg', $socket_message));
 
-                dispatch(new NotifyViaMqtt('delivery_create_request_'.$driver->id, json_encode($socket_data), $driver->id));
+                dispatch(new NotifyViaMqtt('create_request_'.$driver->id, json_encode($socket_data), $driver->id));
 
                 $notifiable_driver = $request_meta_detail->driver->user;
 
-                $notifiable_driver->notify(new AndroidPushNotification($title, $body));
+                $notifiable_driver->notify(new AndroidPushNotification($title, $body, $push_data));
             }
         }
     }

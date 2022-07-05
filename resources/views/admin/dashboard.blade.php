@@ -175,7 +175,6 @@
                 </div>
             </div>
 
-            @if(!auth()->user()->hasRole('owner'))
             <div class="col-sm-6 col-md-3">
                 <div class="card overflow-hidden" style="min-width: 12rem">
                     <div class="bg-holder bg-card"
@@ -192,7 +191,6 @@
                     </div>
                 </div>
             </div>
-            @endif
         </div>
 
         @if(!auth()->user()->hasRole('owner'))
@@ -569,24 +567,28 @@
 
             var barData = JSON.parse('<?php echo json_encode($data); ?>');
             var tripData = JSON.parse('<?php echo json_encode($trips); ?>');
-            barData = Object.values(barData);
 
-            var barChartData = barData[0]
-            var overallEarning = barData[1]
+            var barChartData = barData?.cancel;
+            var overallEarning = barData?.earnings;
+            let cancelValues = [];
+            for(var value in barChartData){
+                // console.log(barChartData[value]);
+            }
 
             var bar = new Morris.Bar({
                 element: 'bar-chart',
                 resize: true,
-                data: [barChartData],
+                data: barChartData,
                 barColors: ['#1e88e5', '#26c6da', '#fc4b6c'],
                 barSizeRatio: 0.5,
                 barGap: 5,
                 xkey: 'y',
-                ykeys: ['a', 'u','d'],
+                ykeys: ['a', 'd','u'],
                 labels: ['Cancelled due to no Drivers', 'Cancelled by User', 'Cancelled by Driver'],
                 hideHover: 'auto',
                 color: '#666666'
             });
+            console.log(barChartData,bar);
 
             if ($('#chart_1').length > 0) {
                 var ctx1 = document.getElementById("chart_1").getContext("2d");

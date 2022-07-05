@@ -228,5 +228,4 @@ return array (
   'view' => 'رأي',
   'version' => 'الإصدار',
   'uploaded' => 'تم الرفع',
-  'goods_type_name'=>'goods type name',
 );

@@ -81,7 +81,6 @@
     @endif
     <td>
 
-    <div class="dropdown">
     <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">@lang('view_pages.action')
     </button>
         <div class="dropdown-menu">
@@ -96,7 +95,9 @@
             <i class="fa fa-dot-circle-o"></i>@lang('view_pages.active')</a>
             @endif
             <a class="dropdown-item sweet-delete" href="#" data-url="{{url('admins/delete',$result->user->id)}}">
+            @if(env('APP_FOR')!='demo')
             <i class="fa fa-trash-o"></i>@lang('view_pages.delete')</a>
+            @endif
         </div>
     </div>
 

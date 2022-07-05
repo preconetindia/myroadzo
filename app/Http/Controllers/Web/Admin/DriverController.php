@@ -38,6 +38,7 @@ use App\Transformers\Payment\DriverWalletHistoryTransformer;
 use App\Base\Constants\Masters\WalletRemarks;
 use Illuminate\Support\Str;
 use App\Models\Payment\WalletWithdrawalRequest;
+use App\Base\Constants\Setting\Settings;
 
 /**
  * @resource Driver
@@ -98,24 +99,23 @@ class DriverController extends BaseController
     * @return \Illuminate\Http\JsonResponse
     */
     public function index()
-    {
+    {   
         $page = trans('pages_names.drivers');
         $main_menu = 'drivers';
         $sub_menu = 'driver_details';
         $services = ServiceLocation::whereActive(true)->companyKey()->get();
-
-        return view('admin.drivers.index', compact('page', 'main_menu', 'sub_menu','services'));
+        $approved = Driver::where('approve', true)->get();
+        // dd($approved);
+        return view('admin.drivers.index', compact('page', 'main_menu', 'sub_menu','services', 'approved'));
     }
 
     /**
-    * Fetch all drivers
+    * Fetch approved drivers
     */
-    public function getAllDrivers(QueryFilterContract $queryFilter)
+    public function getApprovedDrivers(QueryFilterContract $queryFilter)
     {
-        $url = request()->fullUrl(); //get full url
-        return cache()->tags('drivers_list')->remember($url, Carbon::parse('10 minutes'), function () use ($queryFilter) {
-            if (access()->hasRole(RoleSlug::SUPER_ADMIN)) {
-                $query = Driver::orderBy('created_at', 'desc');
+        if (access()->hasRole(RoleSlug::SUPER_ADMIN)) {
+                $query = Driver::where('approve', true)->orderBy('created_at', 'desc');
                 if (env('APP_FOR')=='demo') {
                     $query = Driver::whereHas('user', function ($query) {
                         $query->whereCompanyKey(auth()->user()->company_key);
@@ -129,7 +129,35 @@ class DriverController extends BaseController
             $results = $queryFilter->builder($query)->customFilter(new DriverFilter)->paginate();
 
             return view('admin.drivers._drivers', compact('results'))->render();
-        });
+
+    }
+    public function approvalPending()
+    {
+        $page = trans('pages_names.drivers');
+        $main_menu = 'drivers';
+        $sub_menu = 'driver_approval_pending';
+        $services = ServiceLocation::whereActive(true)->companyKey()->get();
+        return view('admin.drivers.pending-for-approval', compact('page', 'main_menu', 'sub_menu','services'));
+    }
+    public function getApprovalPendingDrivers(QueryFilterContract $queryFilter)
+    {
+         if (access()->hasRole(RoleSlug::SUPER_ADMIN)) {
+                $query = Driver::where('approve', false)->orderBy('created_at', 'desc');
+
+                if (env('APP_FOR')=='demo') {
+                    $query = Driver::whereHas('user', function ($query) {
+                        $query->whereCompanyKey(auth()->user()->company_key);
+                    })->orderBy('created_at', 'desc');
+                }
+            } else {
+                $this->validateAdmin();
+                $query = $this->driver->where('service_location_id', auth()->user()->admin->service_location_id)->orderBy('created_at', 'desc');
+                // $query = Driver::orderBy('created_at', 'desc');
+            }
+            $results = $queryFilter->builder($query)->customFilter(new DriverFilter)->paginate();
+
+            return view('admin.drivers._drivers', compact('results'))->render();
+
     }
 
     /**
@@ -283,10 +311,13 @@ class DriverController extends BaseController
     }
     public function toggleApprove(Driver $driver, $approval_status)
     {
+
         $status = (boolean)$approval_status;
+
         if ($status) {
             $err = false;
             $neededDoc = DriverNeededDocument::count();
+
             $uploadedDoc = count($driver->driverDocument);
 
             if ($neededDoc != $uploadedDoc) {
@@ -339,7 +370,7 @@ class DriverController extends BaseController
         $socket_data->data  = $socket_params;
 
          
-        dispatch(new NotifyViaMqtt('delivery_approval_status_'.$driver_details->id, json_encode($socket_data), $driver_details->id));
+        dispatch(new NotifyViaMqtt('approval_status_'.$driver_details->id, json_encode($socket_data), $driver_details->id));
 
         $user->notify(new AndroidPushNotification($title, $body, $push_data));
 
@@ -442,11 +473,11 @@ class DriverController extends BaseController
         
         $user_currency_code = env('SYSTEM_DEFAULT_CURRENCY');
          
-        $converted_amount_array =  convert_currency_to_usd($user_currency_code, $request->input('amount'));
+        // $converted_amount_array =  convert_currency_to_usd($user_currency_code, $request->input('amount'));
 
-        $converted_amount = $converted_amount_array['converted_amount'];
-        $converted_type = $converted_amount_array['converted_type'];
-        $conversion = $converted_type.':'.$request->amount.'-'.$converted_amount;
+        // $converted_amount = $converted_amount_array['converted_amount'];
+        // $converted_type = $converted_amount_array['converted_type'];
+        // $conversion = $converted_type.':'.$request->amount.'-'.$converted_amount;
         $transaction_id = Str::random(6);
         
        
@@ -466,7 +497,6 @@ class DriverController extends BaseController
             'card_id'=>null,
             'amount'=>$request->amount,
             'transaction_id'=>$transaction_id,
-            'conversion'=>$conversion,
             'merchant'=>null,
             'remarks'=>WalletRemarks::MONEY_DEPOSITED_TO_E_WALLET_FROM_ADMIN,
             'is_credit'=>true]);
@@ -474,8 +504,6 @@ class DriverController extends BaseController
 
          $message = "money_added_successfully";
         return redirect()->back()->with('success', $message);
-
-
 
 
     }
@@ -497,9 +525,9 @@ class DriverController extends BaseController
         $page = trans('pages_names.drivers');
         $main_menu = 'drivers';
         $sub_menu = 'driver_ratings';
-        $trips = RequestRating::where('driver_id',$driver->id)->whereNotNull('user_id')->paginate(10);
-        // dd($trips);
+        $trips = RequestRating::where('driver_id',$driver->id)->whereNotNull('user_id')->whereUserRating(true)->paginate(10);
         $item = $driver;
+        // dd($trips);
          return view('admin.drivers.driver-rating-view', compact('page', 'main_menu', 'sub_menu','item','trips'));
     }
 
@@ -519,12 +547,8 @@ class DriverController extends BaseController
                 })->orderBy('created_at','desc')->paginate(20);
 
             }else{
-
                 $admin_data =auth()->user()->admin;
 
-                if(access()->hasRole(RoleSlug::OWNER)){
-                $admin_data =auth()->user()->owner;
-                }
                $history = WalletWithdrawalRequest::whereHas('driverDetail.user',function($query){
                 $query->companyKey();
                 })->whereHas('driverDetail',function($query)use($admin_data){
@@ -605,4 +629,59 @@ class DriverController extends BaseController
 
         return redirect()->back()->with('success', $message);
     }
+
+        /**
+     * Negative Balance Drivers
+     * 
+     * 
+     * */
+
+    public function NeagtiveBalanceDrivers()
+    {
+        $page = trans('pages_names.negative_balance_drivers');
+        $main_menu = 'drivers';
+        $sub_menu = 'negative_balance_drivers';
+
+        $services = ServiceLocation::whereActive(true)->companyKey()->get();
+        $approved = Driver::where('approve', true)->get();
+        // dd($approved);
+        return view('admin.drivers.negative-balance-drivers', compact('page', 'main_menu', 'sub_menu','services', 'approved'));
+    }
+    public function NegativeBalanceFetch(QueryFilterContract $queryFilter)
+    {
+         $url = request()->fullUrl(); //get full url
+
+         $threshould_value = get_settings(Settings::DRIVER_WALLET_MINIMUM_AMOUNT_TO_GET_ORDER);
+         // dd($threshould_value);
+        return cache()->tags('drivers_list')->remember($url, Carbon::parse('10 minutes'), function () use ($queryFilter,$threshould_value) {
+            if (access()->hasRole(RoleSlug::SUPER_ADMIN)) {
+                $query = Driver::orderBy('created_at', 'desc')->whereHas('driverWallet',function($query)use($threshould_value){
+                    $query->where('amount_balance','<=',$threshould_value);
+                });
+
+                if (env('APP_FOR')=='demo') {
+                    $query = Driver::whereHas('user', function ($query) {
+                        $query->whereCompanyKey(auth()->user()->company_key);
+                    })->whereHas('driverWallet',function($query)use($threshould_value){
+                    $query->where('amount_balance','<=',$threshould_value);
+                })->orderBy('created_at', 'desc');
+                }
+                    // dd($query->get());
+
+            } else {
+                $this->validateAdmin();
+                $query = $this->driver->where('service_location_id', auth()->user()->admin->service_location_id)->whereHas('driverWallet',function($query)use($threshould_value){
+                    $query->where('amount_balance','<=',$threshould_value);
+                })->orderBy('created_at', 'desc');
+                // $query = Driver::orderBy('created_at', 'desc');
+                // dd($query);
+            }
+            $results = $queryFilter->builder($query)->customFilter(new DriverFilter)->paginate();
+
+
+            return view('admin.drivers._drivers-negative-balance', compact('results'))->render();
+        });
+    }
 }
+
+

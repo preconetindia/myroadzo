@@ -17,6 +17,9 @@ use App\Http\Controllers\Web\BaseController;
 use App\Http\Requests\Request\CreateTripRequest;
 use App\Transformers\Requests\TripRequestTransformer;
 use Carbon\Carbon;
+use App\Base\Constants\Setting\Settings;
+use Sk\Geohash\Geohash;
+use Kreait\Firebase\Database;
 
 /**
  * @group Dispatcher-trips-apis
@@ -27,9 +30,10 @@ class DispatcherCreateRequestController extends BaseController
 {
     protected $request;
 
-    public function __construct(Request $request)
+    public function __construct(Request $request,Database $database)
     {
         $this->request = $request;
+        $this->database = $database;
     }
     /**
     * Create Request
@@ -103,9 +107,7 @@ class DispatcherCreateRequestController extends BaseController
             'payment_opt'=>$request->payment_opt,
             'unit'=>$unit,
             'requested_currency_code'=>$currency_code,
-            'service_location_id'=>$service_location->id,
-            'goods_type_id'=>(integer)$request->goods_type_id
-        ];
+            'service_location_id'=>$service_location->id];
 
         // store request details to db
         // DB::beginTransaction();
@@ -118,12 +120,7 @@ class DispatcherCreateRequestController extends BaseController
             'drop_lat'=>$request->drop_lat,
             'drop_lng'=>$request->drop_lng,
             'pick_address'=>$request->pick_address,
-            'drop_address'=>$request->drop_address,
-            'pickup_poc_name'=>$request->pickup_poc_name,
-            'pickup_poc_mobile'=>$request->pickup_poc_mobile,
-            'drop_poc_name'=>$request->drop_poc_name,
-            'drop_poc_mobile'=>$request->drop_poc_mobile
-        ];
+            'drop_address'=>$request->drop_address];
         // store request place details
         $request_detail->requestPlace()->create($request_place_params);
         // $ad_hoc_user_params = $request->only(['name','phone_number']);
@@ -162,7 +159,7 @@ class DispatcherCreateRequestController extends BaseController
         $driver = Driver::find($first_meta_driver);
        
         // Send notify via Mqtt
-        dispatch(new NotifyViaMqtt('delivery_create_request_'.$driver->id, json_encode($mqtt_object), $driver->id));
+        dispatch(new NotifyViaMqtt('create_request_'.$driver->id, json_encode($mqtt_object), $driver->id));
 
         foreach ($selected_drivers as $key => $selected_driver) {
             $request_detail->requestMeta()->create($selected_driver);
@@ -227,18 +224,63 @@ class DispatcherCreateRequestController extends BaseController
         $pick_lng = $request->pick_lng;
 
         // NEW flow
-        $client = new \GuzzleHttp\Client();
-        $url = env('NODE_APP_URL').':'.env('NODE_APP_PORT').'/'.$pick_lat.'/'.$pick_lng.'/'.$type_id;
+        $pick_lat = $request->pick_lat;
+        $pick_lng = $request->pick_lng;
 
-        $res = $client->request('GET', "$url");
-        if ($res->getStatusCode() == 200) {
-            $fire_drivers = \GuzzleHttp\json_decode($res->getBody()->getContents());
-            if (empty($fire_drivers->data)) {
-                return $this->respondFailed('no drivers available');
-            } else {
+        // NEW flow        
+        $driver_search_radius = get_settings('driver_search_radius')?:30;
+
+        $radius = kilometer_to_miles($driver_search_radius);
+
+        $calculatable_radius = ($radius/2);
+
+        $calulatable_lat = 0.0144927536231884 * $calculatable_radius;
+        $calulatable_long = 0.0181818181818182 * $calculatable_radius;
+
+        $lower_lat = ($pick_lat - $calulatable_lat);
+        $lower_long = ($pick_lng - $calulatable_long);
+
+        $higher_lat = ($pick_lat + $calulatable_lat);
+        $higher_long = ($pick_lng + $calulatable_long);
+
+        $g = new Geohash();
+
+        $lower_hash = $g->encode($lower_lat,$lower_long, 12);
+        $higher_hash = $g->encode($higher_lat,$higher_long, 12);
+
+        $conditional_timestamp = Carbon::now()->subMinutes(7)->timestamp;
+
+        $vehicle_type = $type_id;
+
+        $fire_drivers = $this->database->getReference('drivers')->orderByChild('g')->startAt($lower_hash)->endAt($higher_hash)->getValue();
+        
+        $firebase_drivers = [];
+
+        $i=-1;
+
+        foreach ($fire_drivers as $key => $fire_driver) {
+            $i +=1; 
+            $driver_updated_at = Carbon::createFromTimestamp($fire_driver['updated_at'] / 1000)->timestamp;
+
+            if($fire_driver['vehicle_type']==$vehicle_type && $fire_driver['is_active']==1 && $fire_driver['is_available']==1 && $conditional_timestamp < $driver_updated_at){
+
+                $distance = distance_between_two_coordinates($pick_lat,$pick_lng,$fire_driver['l'][0],$fire_driver['l'][1],'K');
+
+                $firebase_drivers[$fire_driver['id']]['distance']= $distance;
+
+            }      
+
+        }
+
+        asort($firebase_drivers);
+
+        if (!empty($firebase_drivers)) {
+           
                 $nearest_driver_ids = [];
-                foreach ($fire_drivers->data as $key => $fire_driver) {
-                    $nearest_driver_ids[] = $fire_driver->id;
+
+                foreach ($firebase_drivers as $key => $firebase_driver) {
+                    
+                    $nearest_driver_ids[]=$key;
                 }
 
                 $driver_search_radius = get_settings('driver_search_radius')?:30;
@@ -257,9 +299,9 @@ class DispatcherCreateRequestController extends BaseController
                 }
 
                 return $this->respondSuccess($nearest_drivers, 'drivers_list');
-            }
+            
         } else {
-            return $this->respondFailed('there is an error-getting-drivers');
+            return $this->respondFailed('no drivers available');
         }
     }
     /**
@@ -277,7 +319,7 @@ class DispatcherCreateRequestController extends BaseController
 
         // Get currency code of Request
         $service_location = $zone_type_detail->zone->serviceLocation;
-        $currency_code = $service_location->currency_code;
+        $currency_code = get_settings('currency_code');;
 
         // fetch unit from zone
         $unit = $zone_type_detail->zone->unit;
@@ -310,7 +352,6 @@ class DispatcherCreateRequestController extends BaseController
             'payment_opt'=>$request->payment_opt,
             'unit'=>$unit,
             'requested_currency_code'=>$currency_code,
-            'goods_type_id'=>(integer)$request->goods_type_id,
             'service_location_id'=>$service_location->id];
 
         // store request details to db
@@ -324,12 +365,7 @@ class DispatcherCreateRequestController extends BaseController
             'drop_lat'=>$request->drop_lat,
             'drop_lng'=>$request->drop_lng,
             'pick_address'=>$request->pick_address,
-            'drop_address'=>$request->drop_address,
-            'pickup_poc_name'=>$request->pickup_poc_name,
-            'pickup_poc_mobile'=>$request->pickup_poc_mobile,
-            'drop_poc_name'=>$request->drop_poc_name,
-            'drop_poc_mobile'=>$request->drop_poc_mobile
-        ];
+            'drop_address'=>$request->drop_address];
             // store request place details
             $request_detail->requestPlace()->create($request_place_params);
 

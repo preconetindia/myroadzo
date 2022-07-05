@@ -12,11 +12,6 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use NotificationChannels\Fcm\Resources\AndroidConfig;
-use NotificationChannels\Fcm\Resources\AndroidFcmOptions;
-use NotificationChannels\Fcm\Resources\AndroidNotification;
-use NotificationChannels\Fcm\Resources\ApnsConfig;
-use NotificationChannels\Fcm\Resources\ApnsFcmOptions;
-use NotificationChannels\Fcm\Resources\AndroidMessagePriority;
 
 class AndroidPushNotification extends Notification implements ShouldQueue
 {
@@ -79,12 +74,7 @@ class AndroidPushNotification extends Notification implements ShouldQueue
             ->setNotification(\NotificationChannels\Fcm\Resources\Notification::create()
                 ->setTitle($this->title)
                 ->setBody($this->body)
-                ->setImage($this->image))->setAndroid(
-                AndroidConfig::create()
-                    ->setFcmOptions(AndroidFcmOptions::create()->setAnalyticsLabel('analytics'))
-                    ->setNotification(AndroidNotification::create()->setColor('#0A0A0A'))
-                    ->setPriority(AndroidMessagePriority::HIGH())
-            );
+                ->setImage($this->image));
         }
     }
 }

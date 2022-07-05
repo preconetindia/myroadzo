@@ -10,8 +10,6 @@ use App\Transformers\User\AdHocUserTransformer;
 use App\Transformers\Requests\RequestBillTransformer;
 use Carbon\Carbon;
 use App\Base\Constants\Masters\PaymentType;
-use App\Transformers\Requests\RequestStopsTransformer;
-use App\Transformers\Requests\RequestProofsTransformer;
 
 
 class TripRequestTransformer extends Transformer
@@ -22,16 +20,7 @@ class TripRequestTransformer extends Transformer
      * @var array
      */
     protected $availableIncludes = [
-        'driverDetail','userDetail','requestBill','requestStops','requestProofs'
-    ];  
-
-    /**
-     * Resources that can be included in default.
-     *
-     * @var array
-     */
-    protected $defaultIncludes = [
-       'requestStops'
+        'driverDetail','userDetail','requestBill'
     ];
 
     /**
@@ -78,10 +67,6 @@ class TripRequestTransformer extends Transformer
             'drop_lng'=>$request->drop_lng,
             'pick_address'=>$request->pick_address,
             'drop_address'=>$request->drop_address,
-            'pickup_poc_name'=>$request->requestPlace->pickup_poc_name,
-            'pickup_poc_mobile'=>$request->requestPlace->pickup_poc_mobile,
-            'drop_poc_name'=>$request->requestPlace->drop_poc_name,
-            'drop_poc_mobile'=>$request->requestPlace->drop_poc_mobile,
             'requested_currency_code'=>$request->requested_currency_code,
             'requested_currency_symbol'=>$request->requested_currency_symbol,
             'user_cancellation_fee'=>0,
@@ -95,9 +80,7 @@ class TripRequestTransformer extends Transformer
             'show_request_eta_amount'=>true,
             'ride_user_rating'=>0,
             'ride_driver_rating'=>0,
-            'if_dispatch'=>false,
-            'goods_type'=>$request->goodsTypeDetail->goods_type_name,
-            'goods_type_quantity'=>$request->goods_type_quantity
+            'if_dispatch'=>false
         ];
 
         if (!$request->is_later) {
@@ -114,15 +97,19 @@ class TripRequestTransformer extends Transformer
         
         if($request->requestRating()->exists()){
 
-            $params['ride_user_rating'] = $request->requestRating()->where('user_id',$request->user_id)->pluck('rating')->first();
+          $params['ride_user_rating'] = $request->requestRating()->where('user_rating',1)->pluck('rating')->first();
 
-            $params['ride_driver_rating'] = $request->requestRating()->where('driver_id',$request->driver_id)->pluck('rating')->first();
+            $params['ride_driver_rating'] = $request->requestRating()->where('driver_rating',1)->pluck('rating')->first();
         }
         if($request->if_dispatch){
 
             $params['if_dispatch'] = true;
             $params['show_request_eta_amount'] = false;
             $params['show_otp_feature'] = false;
+        }
+
+        if(get_settings('show_ride_otp_feature')=='0'){
+            $params['show_otp_feature'] = false;  
         }
         
         if($request->payment_opt ==PaymentType::CARD){
@@ -215,36 +202,4 @@ class TripRequestTransformer extends Transformer
         ? $this->item($requestBill, new RequestBillTransformer)
         : $this->null();
     }
-
-     /**
-    * Include the stops of the request.
-    *
-    * @param RequestModel $request
-    * @return \League\Fractal\Resource\Item|\League\Fractal\Resource\NullResource
-    */
-    public function includeRequestStops(RequestModel $request)
-    {
-        $requestStops = $request->requestStops;
-
-        return $requestStops
-        ? $this->collection($requestStops, new RequestStopsTransformer)
-        : $this->null();
-    }
-
-
-    /**
-    * Include the proof of the request.
-    *
-    * @param RequestModel $request
-    * @return \League\Fractal\Resource\Item|\League\Fractal\Resource\NullResource
-    */
-    public function includeRequestProofs(RequestModel $request)
-    {
-        $requestProofs = $request->requestProofs;
-
-        return $requestProofs
-        ? $this->collection($requestProofs, new RequestProofsTransformer)
-        : $this->null();
-    }
-
 }

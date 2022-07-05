@@ -63,9 +63,8 @@
     @else
     <td><button class="btn btn-danger btn-sm">InActive</button></td>
     @endif
-    <td>
+    <td class="overflow-scroll">
 
-    <div class="dropdown">
     <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">@lang('view_pages.action')
     </button>
         <div class="dropdown-menu">

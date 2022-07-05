@@ -47,8 +47,6 @@ class EtaTransformer extends Transformer
             'description'=> $zone_type->vehicleType->description,
             'short_description'=> $zone_type->vehicleType->short_description,
             'supported_vehicles'=> $zone_type->vehicleType->supported_vehicles,
-            'maimum_weight'=> $zone_type->vehicleType->capacity,
-            'size'=> $zone_type->vehicleType->size,
             'payment_type'=>$zone_type->payment_type,
             'is_default'=>false,
         ];
@@ -181,8 +179,8 @@ class EtaTransformer extends Transformer
         $response['approximate_value'] = 1;
         $response['min_amount'] = $ride->total_price;
         $response['max_amount'] = ($ride->total_price * 1.05);
-        $response['currency'] = $zone_type->zone->serviceLocation->currency_symbol;
-        $response['currency_name'] = $zone_type->zone->serviceLocation->currency_name;
+        $response['currency'] = get_settings('currency_symbol');
+        $response['currency_name'] = get_settings('currency_code');
         $response['type_name'] = $zone_type->vehicleType->name;
         $response['unit'] = $zone_type->unit;
         $response['unit_in_words_without_lang'] = $unit_in_words;
@@ -230,23 +228,56 @@ class EtaTransformer extends Transformer
 
         $distance_in_unit = ($distance_in_unit - $type_prices->base_distance);
         
-        $distance_in_unit = $distance_in_unit>0?:0;
+        if($distance_in_unit < 0 ){
 
-        $distance_price = ($distance_in_unit * $type_prices->price_per_distance);
+            $distance_in_unit = 0;
+        }   
 
-        $surgePrice = ZoneSurgePrice::whereZoneId($zone_type->zone_id)->get();
-        $peakValue = 0;
-        foreach ($surgePrice as $surge) {
-            $startDate = now()->parse($surge->start_time);
-            $endDate = now()->parse($surge->end_time);
+        $price_per_distance = $type_prices->price_per_distance;
 
-            // if(now()->between($startDate,$endDate)){
-            if (now()->gte($startDate)  && now()->lte($endDate)) {
-                $peakValue = $distance_price * ($surge->value / 100);
-            }
+        // Validate if the current time in surge timings
+
+        $timezone = $zone_type->zone->serviceLocation->timezone;
+
+        $current_time = Carbon::now()->setTimezone($timezone);
+
+        $current_time = $current_time->toTimeString();
+
+        $zone_surge_price = ZoneSurgePrice::whereZoneId($zone_type->zone_id)->whereTime('start_time','<=',$current_time)->whereTime('end_time','>=',$current_time)->first();
+
+        if($zone_surge_price){
+
+            $surge_percent = $zone_surge_price->value;
+
+            $surge_price_additional_cost = ($price_per_distance * ($surge_percent / 100));
+
+            $price_per_distance += $surge_price_additional_cost;
+
         }
 
-        $distance_price = $distance_price + $peakValue;
+        $distance_price = ($distance_in_unit * $price_per_distance);
+
+        /**
+         * OLD FLOW FOR SURGE
+         * 
+         * */
+        // $surgePrice = ZoneSurgePrice::whereZoneId($zone_type->zone_id)->get();
+        // $peakValue = 0;
+        // foreach ($surgePrice as $surge) {
+        //     $startDate = now()->parse($surge->start_time);
+        //     $endDate = now()->parse($surge->end_time);
+
+        //     // if(now()->between($startDate,$endDate)){
+        //     if (now()->gte($startDate)  && now()->lte($endDate)) {
+        //         $peakValue = $distance_price * ($surge->value / 100);
+        //     }
+        // }
+
+        // $distance_price = $distance_price + $peakValue;
+
+
+
+
         // $check_if_peak_time = $this->checkIfPeakTime($zone_type, request()->ride_type);
         $time_price = ($dropoff_time_in_seconds / 60) * $type_prices->price_per_time;
         $base_price = $type_prices->base_price;

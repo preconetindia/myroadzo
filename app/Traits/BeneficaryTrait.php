@@ -43,26 +43,6 @@ trait BeneficaryTrait
             'getTransferStatus' => '/payout/v1/getTransferStatus?transferId='
         );
 
-    // private $beneficiary = array(
-    //     'beneId' => 'JOHN180555',
-    //     'name' => 'jhon doe',
-    //     'email' => 'johndoe@cashfree.com',
-    //     'phone' => '9876543210',
-    //     'bankAccount' => '000890289871770',
-    //     'ifsc' => 'SCBL0036078',
-    //     'address1' => 'address1',
-    //     'city' => 'bangalore',
-    //     'state' => 'karnataka',
-    //     'pincode' => '560001',
-    // );
-
-    // private $transfer = array(
-    //     'beneId' => 'JOHN180555',
-    //     'amount' => '1.00',
-    //     'transferId' => 'DEC5555',
-    // );
-
-
 
     private $baseurl = 'https://payout-gamma.cashfree.com';
     
@@ -75,8 +55,7 @@ trait BeneficaryTrait
         $clientSecret = get_settings(Settings::CASH_FREE_TEST_CLIENT_SECRET_FOR_PAYOUT);
 
         if(get_settings(Settings::CASH_FREE_ENVIRONMENT)=='production'){
-        // $clientId = 'CF53232C19371VA55OA211PLM5G';
-        // $clientSecret = '9c71a5f0e6e4a666ab3abc077e17a6aa14ebe316';
+       
         $clientId = get_settings(Settings::CASH_FREE_PRODUCTION_CLIENT_ID_FOR_PAYOUT);
         $clientSecret = get_settings(Settings::CASH_FREE_PRODUCTION_CLIENT_SECRET_FOR_PAYOUT);
 
@@ -107,22 +86,6 @@ trait BeneficaryTrait
 
         $finalUrl = $baseurl.$urls[$action];
         $headers = $this->create_header($token);
-
-        // if($action == 'requestTransfer') {
-
-        //     echo "<pre>";
-        //     print_r($action);
-
-        //     echo "<pre>";
-        //     print_r($data);
-
-        //     echo "<pre>";
-        //     print_r($token);
-
-        //     die();
-
-        // }
-
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_POST, 1);
@@ -164,9 +127,7 @@ trait BeneficaryTrait
         if (curl_errno($ch)) {
             $this->throwCustomException(curl_error($ch));
 
-            // print('error in posting');
-                // print(curl_error($ch));
-                // die();
+        
         }
         curl_close($ch);
 
@@ -186,39 +147,10 @@ trait BeneficaryTrait
         } catch (Exception $ex) {
             $this->throwCustomException($ex->getMessage());
 
-            // error_log('error in getting token');
-                // error_log($ex->getMessage());
-                // die( $ex->getMessage() );
+            
         }
     }
 
-    //get beneficiary details
-    // public function getBeneficiary($token){
-    //     try{
-    //         // global $baseurl, $urls, $beneficiary;
-
-    //         $baseurl = $this->baseurl;
-    //         $urls = $this->urls;
-    //         $beneficiary= $this->beneficiary;
-
-    //         echo "<pre>";
-    //         print_r( $beneficiary );
-
-    //         die();
-
-    //         $beneId = $beneficiary['beneId'];
-    //         $finalUrl = $baseurl.$urls['getBene'].$beneId;
-    //         $response = $this->get_helper($finalUrl, $token);
-    //         return true;
-    //     }
-    //     catch(Exception $ex){
-    //         $msg = $ex->getMessage();
-    //         if(strstr($msg, 'Beneficiary does not exist')) return false;
-    //         error_log('error in getting beneficiary details');
-    //         error_log($msg);
-    //         die();
-    //     }
-    // }
 
     //add beneficiary
     public function addBeneficiary($beneficiary)
@@ -247,10 +179,7 @@ trait BeneficaryTrait
         } catch (Exception $ex) {
             $this->throwCustomException($ex->getMessage());
 
-            // $msg = $ex->getMessage();
-                // error_log('error in requesting transfer');
-                // error_log($msg);
-                // die();
+
         }
     }
 
@@ -270,19 +199,8 @@ trait BeneficaryTrait
         } catch (Exception $ex) {
             $this->throwCustomException($ex->getMessage());
 
-            // $msg = $ex->getMessage();
-                // error_log('error in getting transfer status');
-                // error_log($msg);
-                // die();
         }
     }
 
-    // //main execution
-        // $token = getToken();
 
-        // // $token = 'ab9JCVXpkI6ICc5RnIsICN4MzUIJiOicGbhJye.ab9JCSUVVQflEUBRVVPlVQQJiOiIWdzJCL3MzNxkzM1EjNxojI0FWaiwyNzMjM5MTNxYTM6ICc4VmIsISMzIjL2ETMuYDNucTNxIiOiAXaiwSZzxWYmpjIrNWZoNUZyVHdh52ZpNnIsgjN2MzN6ICZJRnb192YjFmIsIyRBxETQFTMyE0T1UTQ3gjTERTMDJzMyMTNGNkI6ICZJRnbllGbjJye.abk13Mgb2GQ5JvlEZMWBTlvlrq25IJntnwyplhgTf4H0Hnx1RvRL73oxP-8kRTuKg9';
-
-        // if(!getBeneficiary($token)) addBeneficiary($token);
-        // requestTransfer($token);
-        // getTransferStatus($token);
 }

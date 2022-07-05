@@ -11,7 +11,7 @@ return [
     | framework when an event needs to be broadcast. You may set this to
     | any of the connections defined in the "connections" array below.
     |
-    | Supported: "pusher", "ably", "redis", "log", "null"
+    | Supported: "pusher", "redis", "log", "null"
     |
     */
 
@@ -30,6 +30,14 @@ return [
 
     'connections' => [
 
+         'apn' => [
+        'key_id' => env('APN_KEY_ID'),
+        'team_id' => env('APN_TEAM_ID'),
+        'app_bundle_id' => env('APN_BUNDLE_ID'),
+        'private_key_path' => env('APN_PRIVATE_KEY_PATH'),
+        'environment' => \NotificationChannels\Apn\ApnChannel::SANDBOX,
+        ],
+
         'pusher' => [
             'driver' => 'pusher',
             'key' => env('PUSHER_APP_KEY'),
@@ -39,11 +47,6 @@ return [
                 'cluster' => env('PUSHER_APP_CLUSTER'),
                 'useTLS' => true,
             ],
-        ],
-
-        'ably' => [
-            'driver' => 'ably',
-            'key' => env('ABLY_KEY'),
         ],
 
         'redis' => [

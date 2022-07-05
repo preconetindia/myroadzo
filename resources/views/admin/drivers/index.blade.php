@@ -117,7 +117,7 @@
                     </div>
 
                     <div id="js-drivers-partial-target">
-                        <include-fragment src="drivers/fetch">
+                        <include-fragment src="drivers/fetch/approved">
                             <span style="text-align: center;font-weight: bold;"> Loading...</span>
                         </include-fragment>
                     </div>
@@ -147,7 +147,7 @@
                     e.preventDefault();
                     search_keyword = $('#search_keyword').val();
 
-                    fetch('drivers/fetch?search=' + search_keyword)
+                    fetch('drivers/fetch/approved?search=' + search_keyword)
                         .then(response => response.text())
                         .then(html => {
                             document.querySelector('#js-drivers-partial-target').innerHTML = html

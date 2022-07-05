@@ -379,7 +379,7 @@ if (!function_exists('get_distance_matrix')) {
           'units' => "imperial",
           'origins' => "$pick_lat,$pick_lng",
           'destinations' => "$drop_lat,$drop_lng",
-          'key' => env('GOOGLE_MAP_KEY')
+          'key' => get_settings('google_map_key')
         ];
         //AIzaSyDsgTHjo-lusijguNf8XO8aLNyYHe9mRE4
 
@@ -532,6 +532,33 @@ if (!function_exists('find_given_points_in_single_zone_bound')) {
         } else {
             return false;
         }
+    }
+}
+
+
+if (!function_exists('distance_between_two_coordinates')) {
+    function distance_between_two_coordinates($lat1, $lon1, $lat2, $lon2, $unit)
+    {
+        if (($lat1 == $lat2) && ($lon1 == $lon2)) {
+    return 0;
+  }
+  else {
+    $theta = $lon1 - $lon2;
+    $dist = sin(deg2rad($lat1)) * sin(deg2rad($lat2)) +  cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * cos(deg2rad($theta));
+    $dist = acos($dist);
+    $dist = rad2deg($dist);
+    $miles = $dist * 60 * 1.1515;
+    $unit = strtoupper($unit);
+
+    if ($unit == "K") {
+      return ($miles * 1.609344);
+    } else if ($unit == "M") {
+      return ($miles * 0.8684);
+    } else {
+      return $miles;
+    }
+  }
+
     }
 }
 
@@ -1203,6 +1230,7 @@ if (!function_exists('app_logo')) {
         return $setting->app_logo;
     }
 }
+
 if (!function_exists('app_name')) {
     function app_name()
     {

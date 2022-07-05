@@ -19,16 +19,7 @@ class CronTripRequestTransformer extends Transformer
      * @var array
      */
     protected $availableIncludes = [
-        'userDetail','requestStops'
-    ];
-
-     /**
-     * Resources that can be included in default.
-     *
-     * @var array
-     */
-    protected $defaultIncludes = [
-       'requestStops'
+        'userDetail'
     ];
 
     /**
@@ -87,13 +78,9 @@ class CronTripRequestTransformer extends Transformer
             'show_otp_feature'=>true,
             'request_eta_amount'=>$request->request_eta_amount,
             'show_request_eta_amount'=>true,
-            'if_dispatch'=>$request->if_dispatch,
-            'goods_type'=>$request->goodsTypeDetail->goods_type_name,
-            'goods_type_quantity'=>$request->goods_type_quantity
+            'if_dispatch'=>$request->if_dispatch
 
         ];
-
-        $timezone = $request->userDetail->timezone?:env('SYSTEM_DEFAULT_TIMEZONE');
 
 
         if($request->payment_opt ==PaymentType::CARD){
@@ -132,22 +119,6 @@ class CronTripRequestTransformer extends Transformer
 
         return $params;
     }
-
-    /**
-    * Include the stops of the request.
-    *
-    * @param RequestModel $request
-    * @return \League\Fractal\Resource\Item|\League\Fractal\Resource\NullResource
-    */
-    public function includeRequestStops(RequestModel $request)
-    {
-        $requestStops = $request->requestStops;
-
-        return $requestStops
-        ? $this->collection($requestStops, new RequestStopsTransformer)
-        : $this->null();
-    }
-    
     /**
      * Include the user of the request.
      *

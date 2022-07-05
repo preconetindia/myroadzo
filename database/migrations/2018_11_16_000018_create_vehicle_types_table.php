@@ -18,7 +18,7 @@ class CreateVehicleTypesTable extends Migration
             $table->uuid('service_location_id');
             $table->string('name');
             $table->string('icon')->nullable();
-            $table->string('capacity')->nullable();
+            $table->integer('capacity')->default(0);
             $table->boolean('is_accept_share_ride')->default(false);
             $table->boolean('active')->default(true);
             $table->timestamps();

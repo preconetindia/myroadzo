@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\V1\Common;
 use App\Models\Master\CarMake;
 use App\Models\Master\CarModel;
 use App\Http\Controllers\Api\V1\BaseController;
-use Carbon\Carbon;
 
 /**
  * @group Vehicle Management
@@ -23,21 +22,15 @@ class CarMakeAndModelController extends BaseController
         $this->car_model = $car_model;
     }
 
-
-     public function sortByDistance($a, $b) {
-        return $a['distance'] - $b['distance'];
-    }
-
     /**
     * Get All Car makes
     *
     */
     public function getCarMakes()
     {
+
         return $this->respondSuccess($this->car_make->active()->orderBy('name')->get());
     }
-
-   
 
     /**
     * Get Car models by make id

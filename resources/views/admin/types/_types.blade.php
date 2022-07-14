@@ -15,10 +15,6 @@
 <span style="float: right;">
 </span>
 </th>
-<!-- <th> @lang('view_pages.tansport_type')
-<span style="float: right;">
-</span>
-</th> -->
 <th> @lang('view_pages.icon')
 <span style="float: right;">
 </span>
@@ -53,20 +49,11 @@
 <tr>
 <td>{{ $i++ }} </td>
 <td> {{$result->name}}</td>
-
-
-<!-- <td>  @if($result->is_taxi == 'taxi' )
-                        {{ "Taxi" }}
-                    @else
-                        {{ "Delivery" }}
-                    @endif
-</td> -->
-
 <td><img class="img-circle" src="{{$result->icon}}" alt=""></td>
 @if($result->active)
-<td><button class="btn btn-success btn-sm">Active</button></td>
+<td><button class="btn btn-success btn-sm">@lang('view_pages.active')</button></td>
 @else
-<td><button class="btn btn-danger btn-sm">InActive</button></td>
+<td><button class="btn btn-danger btn-sm">@lang('view_pages.inactive')</button></td>
 @endif
 @if(!auth()->user()->company_key)
 <td>
@@ -75,10 +62,8 @@
 </button>
 
     <div class="dropdown-menu" x-placement="bottom-start" style="position: absolute; transform: translate3d(0px, 35px, 0px); top: 0px; left: 0px; will-change: transform;">
-        @if (env('APP_FOR')!='demo')
-        <a class="dropdown-item" href="{{url('types/edit',$result->id)}}"><i class="fa fa-pencil"></i>@lang('view_pages.edit')</a>
 
-        @endif
+        <a class="dropdown-item" href="{{url('types/edit',$result->id)}}"><i class="fa fa-pencil"></i>@lang('view_pages.edit')</a>
 
         @if($result->active)
             <a class="dropdown-item" href="{{url('types/toggle_status',$result->id)}}">

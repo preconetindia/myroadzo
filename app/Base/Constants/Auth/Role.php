@@ -12,6 +12,7 @@ class Role
     const DEVELOPER = 'developer';
     const CLIENT = 'client';
     const OWNER = 'owner';
+    const AREA_MANAGER = 'area-manager';
 
 
     /**
@@ -25,6 +26,7 @@ class Role
             self::SUPER_ADMIN,
             self::ADMIN,
             self::DISPATCHER,
+            self::AREA_MANAGER,
         ];
     }
     /**
@@ -52,6 +54,7 @@ class Role
             self::DEVELOPER,
             self::CLIENT,
             self::OWNER,
+            self::AREA_MANAGER,
         ];
     }
     /**
@@ -76,6 +79,7 @@ class Role
         return [
             self::ADMIN,
             self::SUPER_ADMIN,
+            self::AREA_MANAGER,
 
         ];
     }
@@ -90,6 +94,7 @@ class Role
             self::USER,
             self::SUPER_ADMIN,
             self::ADMIN,
+            self::AREA_MANAGER,
         ];
     }
 

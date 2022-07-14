@@ -9,15 +9,11 @@
      <a href="#" class="logo">
          <!-- mini logo -->
          <b class="logo-mini">
-             <!-- <span class="light-logo" style="display: flex;align-items: end;"> -->
-             <span class="light-logo" style="align-items: end;">
-             <img
-                     src="{{ app_logo() ?? asset('images/email/logo.svg') }}" style="width: 75px;padding-right: 5px;padding-top: 0px!important;"
+             <span class="light-logo" style="display: flex;align-items: end;"><img
+                     src="{{ app_logo() ?? asset('images/email/logo.svg') }}" style="width: 26px;padding-right: 5px;"
                      alt="logo">{{ app_name() ?? 'Tagxi' }}</span>
-             <!-- <span class="dark-logo" style="display: flex;align-items: end;"> -->
-             <span class="dark-logo" style="align-items: end;">
-             <img
-                     src="{{ app_logo() ?? asset('images/email/logo.svg') }}" style="width: 75px;padding-right: 5px;padding-top: 0px!important;"
+             <span class="dark-logo" style="display: flex;align-items: end;"><img
+                     src="{{ app_logo() ?? asset('images/email/logo.svg') }}" style="width: 26px;padding-right: 5px;"
                      alt="logo">{{ app_name() ?? 'Tagxi' }}</span>
          </b>
          <!-- logo-->
@@ -31,14 +27,14 @@
          <!-- Sidebar toggle button-->
 
          <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
-             <span class="sr-only">Toggle navigation</span>
+             <span class="sr-only"> @lang('view_pages.toggle_navigation')</span>
          </a>
 
          <div class="navbar-custom-menu">
              <ul class="nav navbar-nav">
                 <li class="dropdown notifications-menu">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                        <span class="sosicon">SOS Request</span>
+                        <span class="sosicon"> @lang('view_pages.sos_request')</span>
                         {{-- <span class="badge badge-pill badge-danger">0</span> --}}
                         {{-- <i class="mdi mdi-bell-ring sosicon"></i> --}}
                     </a>
@@ -51,27 +47,14 @@
                          <i class="mdi mdi-google-translate"></i>
                      </a>
                      <ul class="dropdown-menu scale-up">
-                        @php
-                             $translations = \DB::table('ltm_translations')->groupBy('locale')->get();
-                        @endphp
-
-                         @foreach ($translations as $k => $translation)
-                             <a class="{{ $translation->locale == session()->get('applocale') ? 'hover-blue' : '' }} dropdown-item chooseLanguage"
-                                 href="#" data-value="{{ $translation->locale  }}">
-                                 <li class="header">
-                                     {{ ucfirst($translation->locale ) }}
-                                 </li>
-                             </a>
-                         @endforeach
-
-                        <!--  @foreach (config('app.app_lang') as $k => $v)
+                         @foreach (config('app.app_lang') as $k => $v)
                              <a class="{{ $k == session()->get('applocale') ? 'hover-blue' : '' }} dropdown-item chooseLanguage"
                                  href="#" data-value="{{ $k }}">
                                  <li class="header">
                                      {{ ucfirst($v) }}
                                  </li>
                              </a>
-                         @endforeach -->
+                         @endforeach
                      </ul>
                  </li>
                  <!-- User Account-->
@@ -98,12 +81,12 @@
                              <div class="row no-gutters">
                                  <div class="col-12 text-left">
                                      <a href="{{ url('admins/profile', auth()->user()->id) }}"><i
-                                             class="ion ion-person"></i> My Profile</a>
+                                             class="ion ion-person"></i> @lang('pages_names.my_profile')</a>
                                  </div>
                                  <div role="separator" class="divider col-12"></div>
                                  <div class="col-12 text-left">
                                      <a href="{{ url('api/spa/logout') }}" class="logout"><i
-                                             class="fa fa-power-off"></i> Logout</a>
+                                             class="fa fa-power-off"></i> @lang('pages_names.logout')</a>
                                  </div>
                              </div>
                              <!-- /.row -->
@@ -122,4 +105,5 @@
 
  <!-- Add the sidebar's background. This div must be placed immediately after the control sidebar -->
  <!-- <div class="control-sidebar-bg"></div> -->
+ 
  

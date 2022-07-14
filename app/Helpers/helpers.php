@@ -379,7 +379,7 @@ if (!function_exists('get_distance_matrix')) {
           'units' => "imperial",
           'origins' => "$pick_lat,$pick_lng",
           'destinations' => "$drop_lat,$drop_lng",
-          'key' => get_settings('google_map_key')
+          'key' => env('GOOGLE_MAP_KEY')
         ];
         //AIzaSyDsgTHjo-lusijguNf8XO8aLNyYHe9mRE4
 
@@ -1230,7 +1230,6 @@ if (!function_exists('app_logo')) {
         return $setting->app_logo;
     }
 }
-
 if (!function_exists('app_name')) {
     function app_name()
     {

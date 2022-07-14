@@ -19,8 +19,9 @@ use App\Jobs\Notifications\AndroidPushNotification;
 use App\Transformers\Requests\TripRequestTransformer;
 use App\Jobs\Notifications\FcmPushNotification;
 use App\Base\Constants\Setting\Settings;
-use Sk\Geohash\Geohash;
 use Kreait\Firebase\Database;
+use Sk\Geohash\Geohash;
+
 /**
  * @group User-trips-apis
  *
@@ -45,6 +46,12 @@ class CreateRequestController extends BaseController
     * @bodyParam vehicle_type string required id of zone_type_id
     * @bodyParam payment_opt tinyInteger required type of ride whther cash or card, wallet('0 => card,1 => cash,2 => wallet)
     * @bodyParam pick_address string required pickup address of the trip request
+    * @bodyParam pickup_poc_name string optionl pickup poc name of the trip pick address
+    * @bodyParam pickup_poc_mobile string optionl pickup poc mobile of the trip pick address
+    * @bodyParam drop_poc_name string optionl drop poc name of the trip drop address
+    * @bodyParam drop_poc_mobile string optionl drop poc mobile of the trip drop address
+    * @bodyParam goods_type_id integer required goods types of the request
+    * @bodyParam goods_type_quantity string required goods type's quantity of the request
     * @bodyParam drop_address string required drop address of the trip request
     * @bodyParam is_later tinyInteger sometimes it represent the schedule rides param must be 1.
     * @bodyParam trip_start_time timestamp sometimes it represent the schedule rides param must be datetime format:Y-m-d H:i:s.
@@ -95,7 +102,7 @@ class CreateRequestController extends BaseController
 
         // Get currency code of Request
         $service_location = $zone_type_detail->zone->serviceLocation;
-        $currency_code = get_settings('currency_code');
+        $currency_code = get_settings(Settings::CURRENCY);
         //Find the zone using the pickup coordinates & get the nearest drivers
 
         $nearest_drivers =  $this->getFirebaseDrivers($request, $type_id);
@@ -129,7 +136,9 @@ class CreateRequestController extends BaseController
             'promo_id'=>$request->promocode_id,
             'requested_currency_code'=>$currency_code,
             'service_location_id'=>$service_location->id,
-            'ride_otp'=>rand(1111, 9999)
+            'ride_otp'=>rand(1111, 9999),
+            'goods_type_id'=>$request->goods_type_id,
+            'goods_type_quantity'=>$request->goods_type_quantity
         ];
 
         if($request->has('rental_pack_id') && $request->rental_pack_id){
@@ -164,6 +173,22 @@ class CreateRequestController extends BaseController
         // DB::beginTransaction();
         // try {
         $request_detail = $this->request->create($request_params);
+
+        // To Store Request stops along with poc details
+        if ($request->has('stops')) {
+            foreach (json_decode($request->stops) as $key => $stop) {
+                $request_detail->requestStops()->create([
+                'address'=>$stop->address,
+                'latitude'=>$stop->latitude,
+                'longitude'=>$stop->longitude,
+                'poc_name'=>$stop->poc_name,
+                'poc_mobile'=>$stop->poc_mobile,
+                'poc_instruction'=>$stop->poc_instruction,
+                'order'=>$stop->order]);
+
+            }
+        }
+
         // request place detail params
         $request_place_params = [
             'pick_lat'=>$request->pick_lat,
@@ -171,12 +196,18 @@ class CreateRequestController extends BaseController
             'drop_lat'=>$request->drop_lat,
             'drop_lng'=>$request->drop_lng,
             'pick_address'=>$request->pick_address,
-            'drop_address'=>$request->drop_address];
+            'drop_address'=>$request->drop_address,
+            'pickup_poc_name'=>$request->pickup_poc_name,
+            'pickup_poc_mobile'=>$request->pickup_poc_mobile,
+            'pickup_poc_instruction'=>$request->pickup_poc_instruction,
+            'drop_poc_instruction'=>$request->drop_poc_instruction,
+            'drop_poc_name'=>$request->drop_poc_name,
+            'drop_poc_mobile'=>$request->drop_poc_mobile
+        ];
         // store request place details
         $request_detail->requestPlace()->create($request_place_params);
         $request_result =  fractal($request_detail, new TripRequestTransformer)->parseIncludes('userDetail');
         
-        Log::info($nearest_drivers);
         // Send Request to the nearest Drivers
          if (!$nearest_drivers) {
                 goto no_drivers_available;
@@ -184,7 +215,6 @@ class CreateRequestController extends BaseController
         $selected_drivers = [];
         $i = 0;
         foreach ($nearest_drivers as $driver) {
-            Log::info("in-loop");
             // $selected_drivers[$i]["request_id"] = $request_detail->id;
             $selected_drivers[$i]["user_id"] = $user_detail->id;
             $selected_drivers[$i]["driver_id"] = $driver->id;
@@ -195,9 +225,11 @@ class CreateRequestController extends BaseController
             $i++;
         }
 
-
         // Send notification to the very first driver
         $first_meta_driver = $selected_drivers[0]['driver_id'];
+        // Add first Driver into Firebase Request Meta
+        $this->database->getReference('request-meta/'.$request_detail->id)->set(['driver_id'=>$first_meta_driver,'request_id'=>$request_detail->id,'user_id'=>$request_detail->user_id,'active'=>1,'updated_at'=> Database::SERVER_TIMESTAMP]);
+
         $pus_request_detail = $request_result->toJson();
         $push_data = ['notification_enum'=>PushEnums::REQUEST_CREATED,'result'=>$pus_request_detail];
         $title = trans('push_notifications.new_request_title');
@@ -223,7 +255,7 @@ class CreateRequestController extends BaseController
 
         // dispatch(new NotifyViaSocket('transfer_msg', $socket_message));
 
-        dispatch(new NotifyViaMqtt('create_request_'.$driver->id, json_encode($socket_data), $driver->id));
+        // dispatch(new NotifyViaMqtt('delivery_create_request_'.$driver->id, json_encode($socket_data), $driver->id));
 
         foreach ($selected_drivers as $key => $selected_driver) {
             $request_detail->requestMeta()->create($selected_driver);
@@ -348,7 +380,7 @@ class CreateRequestController extends BaseController
 
         // Get currency code of Request
         $service_location = $zone_type_detail->zone->serviceLocation;
-        $currency_code = get_settings('currency_code');
+        $currency_code = get_settings(Settings::CURRENCY);
 
         // fetch unit from zone
         $unit = $zone_type_detail->zone->unit;
@@ -382,10 +414,13 @@ class CreateRequestController extends BaseController
             'trip_start_time'=>$trip_start_time,
             'zone_type_id'=>$request->vehicle_type,
             'payment_opt'=>$request->payment_opt,
-            'unit'=>$unit,
+            'unit'=>(string)$unit,
             'requested_currency_code'=>$currency_code,
             'service_location_id'=>$service_location->id,
-            'ride_otp'=>rand(1111, 9999)];
+            'ride_otp'=>rand(1111, 9999),
+            'goods_type_id'=>$request->goods_type_id,
+            'goods_type_quantity'=>$request->goods_type_quantity
+        ];
 
         $request_params['company_key'] = auth()->user()->company_key;
         
@@ -400,14 +435,38 @@ class CreateRequestController extends BaseController
         DB::beginTransaction();
         try {
             $request_detail = $this->request->create($request_params);
-            // request place detail params
-            $request_place_params = [
+            
+            // To Store Request stops along with poc details
+        if ($request->has('stops')) {
+            foreach (json_decode($request->stops) as $key => $stop) {
+                $request_detail->requestStops()->create([
+                'address'=>$stop->address,
+                'latitude'=>$stop->latitude,
+                'longitude'=>$stop->longitude,
+                'poc_name'=>$stop->poc_name,
+                'poc_mobile'=>$stop->poc_mobile,
+                'poc_instruction'=>$stop->poc_instruction,
+                'order'=>$stop->order]);
+
+            }
+        }
+
+        // request place detail params
+        $request_place_params = [
             'pick_lat'=>$request->pick_lat,
             'pick_lng'=>$request->pick_lng,
             'drop_lat'=>$request->drop_lat,
             'drop_lng'=>$request->drop_lng,
             'pick_address'=>$request->pick_address,
-            'drop_address'=>$request->drop_address];
+            'drop_address'=>$request->drop_address,
+            'pickup_poc_name'=>$request->pickup_poc_name,
+            'pickup_poc_mobile'=>$request->pickup_poc_mobile,
+            'pickup_poc_instruction'=>$request->pickup_poc_instruction,
+            'drop_poc_instruction'=>$request->drop_poc_instruction,
+            'drop_poc_name'=>$request->drop_poc_name,
+            'drop_poc_mobile'=>$request->drop_poc_mobile
+        ];
+        
             // store request place details
             $request_detail->requestPlace()->create($request_place_params);
 

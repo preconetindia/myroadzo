@@ -87,7 +87,7 @@
                                     </div>
                                 </div>
 
-                                <!-- <div class="row">
+                               <!--  <div class="row">
                                     <div class="col-sm-6">
                                         <div class="form-group">
                                             <label for="total_uses">@lang('view_pages.total_uses') <span class="text-danger">*</span></label>

@@ -18,6 +18,7 @@ use App\Transformers\Requests\CronTripRequestTransformer;
 use App\Models\Request\DriverRejectedRequest;
 use Sk\Geohash\Geohash;
 use Kreait\Firebase\Database;
+use App\Base\Constants\Setting\Settings;
 
 class AssignDriversForScheduledRides extends Command
 {
@@ -54,7 +55,12 @@ class AssignDriversForScheduledRides extends Command
     public function handle()
     {
         $current_date = Carbon::now()->format('Y-m-d H:i:s');
-        $add_45_min = Carbon::now()->addMinutes(45)->format('Y-m-d H:i:s');
+
+        $findable_duration = get_settings('minimum_time_for_search_drivers_for_schedule_ride');
+        if(!$findable_duration){
+            $findable_duration = 45;
+        }
+        $add_45_min = Carbon::now()->addMinutes($findable_duration)->format('Y-m-d H:i:s');
         // DB::enableQueryLog();
         $requests = Request::where('is_later', 1)
                     ->where('trip_start_time', '<=', $add_45_min)
@@ -171,6 +177,10 @@ class AssignDriversForScheduledRides extends Command
 
                         // Send notification to the very first driver
                         $first_meta_driver = $selected_drivers[0]['driver_id'];
+                        
+                        // Add first Driver into Firebase Request Meta
+                        $this->database->getReference('request-meta/'.$request->id)->set(['driver_id'=>$first_meta_driver,'request_id'=>$request->id,'user_id'=>$request->user_id,'active'=>1,'is_later'=>1,'updated_at'=> Database::SERVER_TIMESTAMP]);
+
                         $request_result =  fractal($request, new CronTripRequestTransformer)->parseIncludes('userDetail');
                         $pus_request_detail = $request_result->toJson();
                         $push_data = ['notification_enum'=>PushEnums::REQUEST_CREATED,'result'=>(string)$pus_request_detail];
@@ -192,7 +202,7 @@ class AssignDriversForScheduledRides extends Command
 
                         // dispatch(new NotifyViaSocket('transfer_msg', $socket_message));
 
-                        dispatch(new NotifyViaMqtt('create_request_'.$driver->id, json_encode($socket_data), $driver->id));
+                         // dispatch(new NotifyViaMqtt('delivery_create_request_'.$driver->id, json_encode($socket_data), $driver->id));
 
                         foreach ($selected_drivers as $key => $selected_driver) {
                             $request->requestMeta()->create($selected_driver);

@@ -30,7 +30,7 @@
                             </div>
 
 
-                            @if (env('APP_FOR')!='demo')
+                            @if (!auth()->user()->company_key)
                                 <div class="col-md-7 text-center text-md-right">
                                     <a href="{{ url('types/create') }}" class="btn btn-primary btn-sm">
                                         <i class="mdi mdi-plus-circle mr-2"></i>@lang('view_pages.add_types')</a>
@@ -44,7 +44,7 @@
                     </div>
                     <div id="js-types-partial-target">
                         <include-fragment src="types/fetch">
-                            <span style="text-align: center;font-weight: bold;"> Loading...</span>
+                            <span style="text-align: center;font-weight: bold;">@lang('view_pages.loading')</span>
                         </include-fragment>
                     </div>
                 </div>

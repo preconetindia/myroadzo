@@ -19,6 +19,7 @@ use App\Base\Constants\Masters\WalletRemarks;
 use App\Jobs\Notifications\AndroidPushNotification;
 use App\Jobs\NotifyViaMqtt;
 use App\Base\Constants\Masters\PushEnums;
+use App\Base\Constants\Setting\Settings;
 
 
 /**
@@ -29,49 +30,7 @@ use App\Base\Constants\Masters\PushEnums;
 class FlutterWaveController extends ApiController
 {
 
-    /**
-     * Initialize Payment
-     * 
-     * 
-     * 
-     * */
-    public function initialize(Request $request){
 
-        $paystack_initialize_url = 'https://api.paystack.co/transaction/initialize';
-
-        $headers = [
-            'Authorization:Bearer '.env('PAYSTACK_TEST_SECRET_KEY'),
-            'Content-Type:application/json'
-            ];
-
-        $customer_email = auth()->user()->email;
-
-        $amount = $request->amount;
-
-        $query = [
-            'email'=> $customer_email,
-            'amount'=>$request->amount
-            ];
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $paystack_initialize_url);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($query));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        $result = curl_exec($ch);
-
-
-        if ($result) {
-            $result = json_decode($result);
-            return response()->json($result);
-        }
-
-        return $this->respondFailed();
-
-
-
-    }
 
     /**
     * Add money to wallet
@@ -95,6 +54,15 @@ class FlutterWaveController extends ApiController
     public function addMoneyToWallet(AddMoneyToWalletRequest $request)
     {
         
+        $user_currency_code = get_settings(Settings::CURRENCY);
+
+        // Convert the amount to USD to any currency
+        // $converted_amount_array =  convert_currency_to_usd($user_currency_code, $request->input('amount'));
+
+        // $converted_amount = $converted_amount_array['converted_amount'];
+        // $converted_type = $converted_amount_array['converted_type'];
+
+        // $conversion = $converted_type.':'.$request->amount.'-'.$converted_amount;
         $transaction_id = $request->payment_id;
 
             $user = auth()->user();
@@ -133,7 +101,7 @@ class FlutterWaveController extends ApiController
                 $title = trans('push_notifications.amount_credited_to_your_wallet_title');
                 $body = trans('push_notifications.amount_credited_to_your_wallet_body');
 
-                dispatch(new NotifyViaMqtt('add_money_to_wallet_status'.$user_id, json_encode($socket_data), $user_id));
+                // dispatch(new NotifyViaMqtt('delivery_add_money_to_wallet_status'.$user_id, json_encode($socket_data), $user_id));
                 
                 $user->notify(new AndroidPushNotification($title, $body));
 

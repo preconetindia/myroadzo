@@ -25,8 +25,6 @@ class CarMakeController extends BaseController
 
     public function index()
     {
-
-      
         $page = trans('pages_names.view_car_make');
 
         $main_menu = 'master';

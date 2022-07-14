@@ -15,6 +15,20 @@ class SettingsSeeder extends Seeder
      * @var array
      */
     protected $settings_from_seeder = [
+        // SettingSlug::EMAIL => [
+        //     'category'=>SettingCategory::NOTIFICATION,
+        //     'value' => 1,
+        //     'field' => SettingValueType::SELECT,
+        //     'option_value' => '{"yes":1,"no":0}',
+        //     'group_name' => null,
+        // ],
+        //     SettingSlug::SMS => [
+        //     'category'=>SettingCategory::NOTIFICATION,
+        //     'value' => 1,
+        //     'field' => SettingValueType::SELECT,
+        //     'option_value' => '{"yes":1,"no":0}',
+        //     'group_name' => null,
+        // ],
 
         SettingSlug::SERVICE_TAX => [
             'category'=>SettingCategory::TRIP_SETTINGS,
@@ -60,18 +74,38 @@ class SettingsSeeder extends Seeder
         ],
          SettingSlug::DRIVER_SEARCH_RADIUS => [
             'category'=>SettingCategory::TRIP_SETTINGS,
-            'value' => 3,
+            'value' => 30,
+            'field' => SettingValueType::TEXT,
+            'option_value' => null,
+            'group_name' => null,
+        ],SettingSlug::USER_CAN_MAKE_A_RIDE_AFTER_X_MINIUTES => [
+            'category'=>SettingCategory::TRIP_SETTINGS,
+            'value' => 30,
             'field' => SettingValueType::TEXT,
             'option_value' => null,
             'group_name' => null,
         ],
-        //  SettingSlug::MINIMUM_TIME_FOR_SEARCH_DRIVERS_FOR_SCHEDULE_RIDE => [
-        //     'category'=>SettingCategory::TRIP_SETTINGS,
-        //     'value' => 30,
-        //     'field' => SettingValueType::TEXT,
-        //     'option_value' => null,
-        //     'group_name' => null,
-        // ],
+         SettingSlug::MINIMUM_TIME_FOR_SEARCH_DRIVERS_FOR_SCHEDULE_RIDE => [
+            'category'=>SettingCategory::TRIP_SETTINGS,
+            'value' => 30,
+            'field' => SettingValueType::TEXT,
+            'option_value' => null,
+            'group_name' => null,
+        ],
+        SettingSlug::MAXIMUM_TIME_FOR_FIND_DRIVERS_FOR_REGULAR_RIDE => [
+            'category'=>SettingCategory::TRIP_SETTINGS,
+            'value' => 5,
+            'field' => SettingValueType::TEXT,
+            'option_value' => null,
+            'group_name' => null,
+        ],
+        SettingSlug::TRIP_ACCEPT_REJECT_DURATION_FOR_DRIVER => [
+            'category'=>SettingCategory::TRIP_SETTINGS,
+            'value' => 30,
+            'field' => SettingValueType::TEXT,
+            'option_value' => null,
+            'group_name' => null,
+        ],
         // General category settings
         SettingSlug::LOGO => [
             'category'=>SettingCategory::GENERAL,
@@ -94,35 +128,63 @@ class SettingsSeeder extends Seeder
             'option_value' => null,
             'group_name' => null,
         ],
-        // SettingSlug::HEAD_OFFICE_NUMBER => [
-        //     'category'=>SettingCategory::GENERAL,
-        //     'value' => '+8299600007',
-        //     'field' => SettingValueType::TEXT,
-        //     'option_value' => null,
-        //     'group_name' => null,
-        // ],
-        // SettingSlug::HELP_EMAIL_ADDRESS => [
-        //     'category'=>SettingCategory::GENERAL,
-        //     'value' => 'sales@tagyourtaxi.com',
-        //     'field' => SettingValueType::TEXT,
-        //     'option_value' => null,
-        //     'group_name' => null,
-        // ],
+        SettingSlug::HEAD_OFFICE_NUMBER => [
+            'category'=>SettingCategory::GENERAL,
+            'value' => '+8299600007',
+            'field' => SettingValueType::TEXT,
+            'option_value' => null,
+            'group_name' => null,
+        ],
+        SettingSlug::HELP_EMAIL_ADDRESS => [
+            'category'=>SettingCategory::GENERAL,
+            'value' => 'sales@tagyourtaxi.com',
+            'field' => SettingValueType::TEXT,
+            'option_value' => null,
+            'group_name' => null,
+        ],
+         SettingSlug::ENABLE_SHIPMENT_LOAD_FEATURE => [
+            'category'=>SettingCategory::GENERAL,
+            'value' => '1',
+            'field' => SettingValueType::SELECT,
+            'option_value' => '{"yes":1,"no":0}',
+            'group_name' => null,
+        ],
+        SettingSlug::ENABLE_SHIPMENT_UNLOAD_FEATURE => [
+            'category'=>SettingCategory::GENERAL,
+            'value' => '1',
+            'field' => SettingValueType::SELECT,
+            'option_value' => '{"yes":1,"no":0}',
+            'group_name' => null,
+        ],
+        SettingSlug::ENABLE_DIGITAL_SIGNATURE => [
+            'category'=>SettingCategory::GENERAL,
+            'value' => '1',
+            'field' => SettingValueType::SELECT,
+            'option_value' => '{"yes":1,"no":0}',
+            'group_name' => null,
+        ],
         SettingSlug::DRIVER_WALLET_MINIMUM_AMOUNT_TO_GET_ORDER => [
             'category'=>SettingCategory::WALLET,
-            'value' => -10000,
+            'value' => 1000,
+            'field' => SettingValueType::TEXT,
+            'option_value' => null,
+            'group_name' => null,
+        ],
+        SettingSlug::DEFAULT_COUNTRY_CODE_FOR_MOBILE_APP => [
+            'category'=>SettingCategory::GENERAL,
+            'value' => 'IN',
             'field' => SettingValueType::TEXT,
             'option_value' => null,
             'group_name' => null,
         ],
         // Installation settings
-        // SettingSlug::GOOGLE_BROWSER_KEY => [
-        //     'category'=>SettingCategory::INSTALLATION,
-        //     'value' => '**********************',
-        //     'field' => SettingValueType::TEXT,
-        //     'option_value' => null,
-        //     'group_name' => null,
-        // ],
+        SettingSlug::GOOGLE_BROWSER_KEY => [
+            'category'=>SettingCategory::INSTALLATION,
+            'value' => '**********************',
+            'field' => SettingValueType::TEXT,
+            'option_value' => null,
+            'group_name' => null,
+        ],
         // SettingSlug::TWILLO_ACCOUNT_SID => [
         //     'category'=>SettingCategory::INSTALLATION,
         //     'value' => 'AC75a5048afaf14beaafec1a8c9e92e766',
@@ -145,7 +207,58 @@ class SettingsSeeder extends Seeder
         //     'group_name' => SettingSubGroup::TWILLO_SETTINGS,
         // ],
 
-           SettingSlug::ENABLE_STRIPE => [
+        SettingSlug::ENABLE_BRAIN_TREE => [
+            'category'=>SettingCategory::INSTALLATION,
+            'value' => '1',
+            'field' => SettingValueType::SELECT,
+            'option_value' => '{"yes":1,"no":0}',
+            'group_name' => SettingSubGroup::BRAINTREE_SETTINGS,
+        ],
+        SettingSlug::BRAINTREE_ENVIRONMENT => [
+            'category'=>SettingCategory::INSTALLATION,
+            'value' => 'sandbox',
+            'field' => SettingValueType::TEXT,
+            'option_value' => null,
+            'group_name' => SettingSubGroup::BRAINTREE_SETTINGS,
+        ],
+        
+            SettingSlug::BRAINTREE_MERCHANT_ID => [
+            'category'=>SettingCategory::INSTALLATION,
+            'value' => 'pwc2hd46g93s4zy2',
+            'field' => SettingValueType::TEXT,
+            'option_value' => null,
+            'group_name' => SettingSubGroup::BRAINTREE_SETTINGS,
+        ],
+            SettingSlug::BRAINTREE_PUBLIC_KEY => [
+            'category'=>SettingCategory::INSTALLATION,
+            'value' => 'gq22n23p93j65rs3',
+            'field' => SettingValueType::TEXT,
+            'option_value' => null,
+            'group_name' => SettingSubGroup::BRAINTREE_SETTINGS,
+        ],
+            SettingSlug::BRAINTREE_PRIVATE_KEY => [
+            'category'=>SettingCategory::INSTALLATION,
+            'value' => '493fe24935e45beb46522e845a75d2ed',
+            'field' => SettingValueType::TEXT,
+            'option_value' => null,
+            'group_name' => SettingSubGroup::BRAINTREE_SETTINGS,
+        ],
+            SettingSlug::BRAINTREE_MASTER_MERCHANT => [
+            'category'=>SettingCategory::INSTALLATION,
+            'value' => 'ganeshOwner',
+            'field' => SettingValueType::TEXT,
+            'option_value' => null,
+            'group_name' => SettingSubGroup::BRAINTREE_SETTINGS,
+        ],
+            SettingSlug::BRAINTREE_DEFAULT_MERCHANT => [
+            'category'=>SettingCategory::INSTALLATION,
+            'value' => 'tagxi',
+            'field' => SettingValueType::TEXT,
+            'option_value' => null,
+            'group_name' => SettingSubGroup::BRAINTREE_SETTINGS,
+        ],
+
+        SettingSlug::ENABLE_STRIPE => [
             'category'=>SettingCategory::INSTALLATION,
             'value' => '1',
             'field' => SettingValueType::SELECT,
@@ -158,22 +271,6 @@ class SettingsSeeder extends Seeder
             'value' => 'test',
             'field' => SettingValueType::TEXT,
              'option_value' => '{"test":"test","production":"production"}',
-            'group_name' => SettingSubGroup::STRIPE_SETTINGS,
-        ],
-
-         SettingSlug::STRIPE_TEST_PUBLISHABLE_KEY => [
-            'category'=>SettingCategory::INSTALLATION,
-            'value' => 'pk_test_51IuYWUSBCHfacuRqacrdy8IOlL3uUPq1XI0BZaRlqDPPcNsmywe6rSqjpM9HhVmELhXWhx95CH1pvNyQ8pvQEil900eGE0jXN8',
-            'field' => SettingValueType::TEXT,
-            'option_value' => null,
-            'group_name' => SettingSubGroup::STRIPE_SETTINGS,
-        ],
-
-        SettingSlug::STRIPE_LIVE_PUBLISHABLE_KEY => [
-            'category'=>SettingCategory::INSTALLATION,
-            'value' => 'pk_test_51IuYWUSBCHfacuRqacrdy8IOlL3uUPq1XI0BZaRlqDPPcNsmywe6rSqjpM9HhVmELhXWhx95CH1pvNyQ8pvQEil900eGE0jXN8',
-            'field' => SettingValueType::TEXT,
-            'option_value' => null,
             'group_name' => SettingSubGroup::STRIPE_SETTINGS,
         ],
 
@@ -192,7 +289,22 @@ class SettingsSeeder extends Seeder
             'option_value' => null,
             'group_name' => SettingSubGroup::STRIPE_SETTINGS,
         ],
-        
+         SettingSlug::STRIPE_TEST_PUBLISHABLE_KEY => [
+            'category'=>SettingCategory::INSTALLATION,
+            'value' => 'pk_test_51IuYWUSBCHfacuRqacrdy8IOlL3uUPq1XI0BZaRlqDPPcNsmywe6rSqjpM9HhVmELhXWhx95CH1pvNyQ8pvQEil900eGE0jXN8',
+            'field' => SettingValueType::TEXT,
+            'option_value' => null,
+            'group_name' => SettingSubGroup::STRIPE_SETTINGS,
+        ],
+
+        SettingSlug::STRIPE_LIVE_PUBLISHABLE_KEY => [
+            'category'=>SettingCategory::INSTALLATION,
+            'value' => 'pk_test_51IuYWUSBCHfacuRqacrdy8IOlL3uUPq1XI0BZaRlqDPPcNsmywe6rSqjpM9HhVmELhXWhx95CH1pvNyQ8pvQEil900eGE0jXN8',
+            'field' => SettingValueType::TEXT,
+            'option_value' => null,
+            'group_name' => SettingSubGroup::STRIPE_SETTINGS,
+        ],
+
         SettingSlug::ENABLE_PAYSTACK => [
             'category'=>SettingCategory::INSTALLATION,
             'value' => '1',
@@ -338,7 +450,6 @@ class SettingsSeeder extends Seeder
             'option_value' => null,
             'group_name' => SettingSubGroup::RAZOR_PAY_SETTINGS,
         ],
-     
         SettingSlug::REFERRAL_COMMISION_FOR_USER => [
             'category'=>SettingCategory::REFERRAL,
             'value' => 30,
@@ -353,18 +464,25 @@ class SettingsSeeder extends Seeder
             'option_value' => null,
             'group_name' => null,
         ],
-        //  SettingSlug::MINIMUM_TRIPS_SHOULD_COMPLETE_TO_REFER_DRIVERS => [
-        //     'category'=>SettingCategory::REFERRAL,
-        //     'value' => 30,
-        //     'field' => SettingValueType::TEXT,
-        //     'option_value' => null,
-        //     'group_name' => null,
-        // ],
+         SettingSlug::MINIMUM_TRIPS_SHOULD_COMPLETE_TO_REFER_DRIVERS => [
+            'category'=>SettingCategory::REFERRAL,
+            'value' => 30,
+            'field' => SettingValueType::TEXT,
+            'option_value' => null,
+            'group_name' => null,
+        ],
 
         SettingSlug::GOOGLE_MAP_KEY => [
             'category'=>SettingCategory::MAP_SETTINGS,
             'value' => 'AIzaSyBeVRs1icwooRpk7ErjCEQCwu0OQowVt9I',
-            'field' => SettingValueType::TEXT,
+            'field' => SettingValueType::PASSWORD,
+            'option_value' => null,
+            'group_name' => null,
+        ], 
+        SettingSlug::GOOGLE_MAP_KEY_FOR_DISTANCE_MATRIX => [
+            'category'=>SettingCategory::MAP_SETTINGS,
+            'value' => 'AIzaSyBeVRs1icwooRpk7ErjCEQCwu0OQowVt9I',
+            'field' => SettingValueType::PASSWORD,
             'option_value' => null,
             'group_name' => null,
         ], 
@@ -424,7 +542,7 @@ class SettingsSeeder extends Seeder
             'option_value' => null,
             'group_name' => null,
         ],
-         SettingSlug::CURRENCY => [
+        SettingSlug::CURRENCY => [
             'category'=>SettingCategory::GENERAL,
             'value' => 'INR',
             'field' => SettingValueType::TEXT,
@@ -434,6 +552,14 @@ class SettingsSeeder extends Seeder
         SettingSlug::CURRENCY_SYMBOL => [
             'category'=>SettingCategory::GENERAL,
             'value' => '₹',
+            'field' => SettingValueType::TEXT,
+            'option_value' => null,
+            'group_name' => null,
+        ],
+
+        SettingSlug::DEFAULT_COUNTRY_CODE_FOR_MOBILE_APP => [
+            'category'=>SettingCategory::GENERAL,
+            'value' => 'IN',
             'field' => SettingValueType::TEXT,
             'option_value' => null,
             'group_name' => null,

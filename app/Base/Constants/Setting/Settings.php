@@ -36,6 +36,7 @@ class Settings
     const GOOGLE_MAP_KEY='google_map_key';
     const MAPBOX_KEY='map_box_key';
     const ENABLE_BRAIN_TREE='enable_brain_tree';
+    const STRIPE_SECRET='stripe_secret';
     const DRIVER_WALLET_MINIMUM_AMOUNT_TO_GET_ORDER='driver-wallet-minimum-amount-to-get-order';
     const FIREBASE_DB_URL='firebase-db-url';
     const FIREBASE_API_KEY='firebase-api-key';
@@ -46,6 +47,7 @@ class Settings
     const FIREBASE_APP_ID='firebase-app-id';
     const FIREBASE_MEASUREMENT_ID='firebase-measurement-id';
     
+
     const ENABLE_PAYSTACK='enable-paystack';
     const PAYSTACK_ENVIRONMENT='paystack-environment';
     const PAYSTACK_TEST_SECRET_KEY='paystack-test-secret-key';
@@ -59,8 +61,8 @@ class Settings
     const ENABLE_STRIPE='enable-stripe';
     const STRIPE_ENVIRONMENT='stripe-environment';
 
-    const STRIPE_TEST_SECRET_KEY='stripe_test_secret_key';
-    const STRIPE_LIVE_SECRET_KEY='stripe_live_secret_key';
+    const STRIPE_TEST_SECRET_KEY='stripe-test-secret Key';
+    const STRIPE_LIVE_SECRET_KEY='stripe-live-secret Key';
 
     const ENABLE_CASH_FREE='enable-cashfree';
     const CASH_FREE_ENVIRONMENT ='cash_free_environment';
@@ -88,9 +90,21 @@ class Settings
     const CURRENCY = 'currency_code';
     const CURRENCY_SYMBOL='currency_symbol';
 
+    const DEFAULT_COUNTRY_CODE_FOR_MOBILE_APP='default_country_code_for_mobile_app';
+
     const SHOW_RENTAL_RIDE_FEATURE='show_rental_ride_feature';
     const SHOW_RIDE_OTP_FEATURE='show_ride_otp_feature';
     const SHOW_RIDE_LATER_FEATURE='show_ride_later_feature';
+    const GOOGLE_MAP_KEY_FOR_DISTANCE_MATRIX='google_map_key_for_distance_matrix';
 
-   
+    const ENABLE_SHIPMENT_LOAD_FEATURE='enable_shipment_load_feature';
+    const ENABLE_SHIPMENT_UNLOAD_FEATURE='enable_shipment_unload_feature';
+    const ENABLE_DIGITAL_SIGNATURE='enable_digital_signature';
+
+    const USER_CAN_MAKE_A_RIDE_AFTER_X_MINIUTES='user_can_make_a_ride_after_x_miniutes';
+    const TRIP_ACCEPT_REJECT_DURATION_FOR_DRIVER='trip_accept_reject_duration_for_driver';
+    const MAXIMUM_TIME_FOR_FIND_DRIVERS_FOR_REGULAR_RIDE='maximum_time_for_find_drivers_for_regular_ride';
+    const DEFAULT_COUNTRY_CODE_FOR_MOBILE_APP='default_country_code_for_mobile_app';
+
+    
 }

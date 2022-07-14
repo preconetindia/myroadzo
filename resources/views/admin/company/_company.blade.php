@@ -59,12 +59,13 @@
     <td>{{$result->mobile}}</td>
     <td>{{$result->address}}</td>
     @if($result->active)
-    <td><button class="btn btn-success btn-sm">Active</button></td>
+    <td><button class="btn btn-success btn-sm">@lang('view_pages.active')</button></td>
     @else
-    <td><button class="btn btn-danger btn-sm">InActive</button></td>
+    <td><button class="btn btn-danger btn-sm">@lang('view_pages.inactive')</button></td>
     @endif
-    <td class="overflow-scroll">
+    <td>
 
+    <div class="dropdown">
     <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">@lang('view_pages.action')
     </button>
         <div class="dropdown-menu">

@@ -2,7 +2,7 @@
 
 namespace App\Exceptions;
 
-use Exception;
+use Throwable;
 use Illuminate\Http\Response;
 use Illuminate\Database\QueryException;
 use Illuminate\Auth\AuthenticationException;
@@ -39,12 +39,12 @@ class Handler extends ExceptionHandler
      * @param  \Exception  $exception
      * @return void
      */
-    public function report(Exception $exception)
+    public function report(Throwable $exception)
     {
         $isDebugSendMailOpen = \Config::get('app.debug_sendmail_open');
         $debugSendMailEmail = \Config::get('app.debug_sendmail_email');
 
-        if ($isDebugSendMailOpen && $debugSendMailEmail != '' && $exception instanceof Exception && !in_array(get_class($exception), $this->dontReport)) {
+        if ($isDebugSendMailOpen && $debugSendMailEmail != '' && $exception instanceof Throwable && !in_array(get_class($exception), $this->dontReport)) {
             $debugSetting = \Config::get('app.debug');
             $appName = \Config::get('app.name');
 
@@ -67,7 +67,7 @@ class Handler extends ExceptionHandler
                 // });
 
                 // dispatch(new SendExceptionToEmailNotification($emailTemplateModel, $debugSendMailEmail));
-            } catch (Exception $e2) {
+            } catch (Throwable $e2) {
                 dd($e2);
             }
         }
@@ -79,10 +79,10 @@ class Handler extends ExceptionHandler
      * Render an exception into an HTTP response.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \Exception  $exception
+     * @param  \Throwable  $exception
      * @return \Illuminate\Http\Response
      */
-    public function render($request, Exception $exception)
+    public function render($request, Throwable $exception)
     {
         if ($this->expectsJson($request)) {
             return $this->getJsonResponse($exception);
@@ -91,7 +91,7 @@ class Handler extends ExceptionHandler
         return parent::render($request, $exception);
     }
 
-    protected function getJsonResponse(Exception $exception)
+    protected function getJsonResponse(Throwable $exception)
     {
         $exception = $this->prepareException($exception);
 
@@ -152,11 +152,11 @@ class Handler extends ExceptionHandler
     /**
      * Get the exception status code
      *
-     * @param Exception $exception
+     * @param Throwable $exception
      * @param int $defaultStatusCode
      * @return int
      */
-    protected function getStatusCode(Exception $exception, $defaultStatusCode = Response::HTTP_INTERNAL_SERVER_ERROR)
+    protected function getStatusCode(Throwable $exception, $defaultStatusCode = Response::HTTP_INTERNAL_SERVER_ERROR)
     {
         if ($this->isHttpException($exception)) {
             return $exception->getStatusCode();

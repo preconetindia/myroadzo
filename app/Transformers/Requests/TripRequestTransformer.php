@@ -10,7 +10,9 @@ use App\Transformers\User\AdHocUserTransformer;
 use App\Transformers\Requests\RequestBillTransformer;
 use Carbon\Carbon;
 use App\Base\Constants\Masters\PaymentType;
-
+use App\Transformers\Requests\RequestStopsTransformer;
+use App\Transformers\Requests\RequestProofsTransformer;
+use App\Base\Constants\Setting\Settings;
 
 class TripRequestTransformer extends Transformer
 {
@@ -20,7 +22,16 @@ class TripRequestTransformer extends Transformer
      * @var array
      */
     protected $availableIncludes = [
-        'driverDetail','userDetail','requestBill'
+        'driverDetail','userDetail','requestBill','requestStops','requestProofs'
+    ];  
+
+    /**
+     * Resources that can be included in default.
+     *
+     * @var array
+     */
+    protected $defaultIncludes = [
+       'requestStops'
     ];
 
     /**
@@ -67,6 +78,12 @@ class TripRequestTransformer extends Transformer
             'drop_lng'=>$request->drop_lng,
             'pick_address'=>$request->pick_address,
             'drop_address'=>$request->drop_address,
+            'pickup_poc_name'=>$request->requestPlace->pickup_poc_name,
+            'pickup_poc_mobile'=>$request->requestPlace->pickup_poc_mobile,
+            'drop_poc_name'=>$request->requestPlace->drop_poc_name,
+            'drop_poc_mobile'=>$request->requestPlace->drop_poc_mobile,
+            'pickup_poc_instruction'=>$request->requestPlace->pickup_poc_instruction,
+            'drop_poc_instruction'=>$request->requestPlace->drop_poc_instruction,
             'requested_currency_code'=>$request->requested_currency_code,
             'requested_currency_symbol'=>$request->requested_currency_symbol,
             'user_cancellation_fee'=>0,
@@ -80,8 +97,30 @@ class TripRequestTransformer extends Transformer
             'show_request_eta_amount'=>true,
             'ride_user_rating'=>0,
             'ride_driver_rating'=>0,
-            'if_dispatch'=>false
+            'if_dispatch'=>false,
+            'goods_type'=>$request->goodsTypeDetail->goods_type_name,
+            'goods_type_quantity'=>$request->goods_type_quantity
         ];
+
+
+        $maximum_time_for_find_drivers_for_regular_ride = (get_settings(Settings::MAXIMUM_TIME_FOR_FIND_DRIVERS_FOR_REGULAR_RIDE) * 60);
+
+        $current_time = $current_time = Carbon::now();
+
+        $trip_requested_time = Carbon::parse($request->created_at);
+
+        $difference_request_duration = $trip_requested_time->diffInMinutes($current_time);
+
+        $difference_request_duration = $difference_request_duration * 60;
+
+        $final_interval = ($maximum_time_for_find_drivers_for_regular_ride - $difference_request_duration);
+
+        if($final_interval<0){
+            $final_interval =1;
+        }
+        $params['maximum_time_for_find_drivers_for_regular_ride'] = $final_interval;
+
+
 
         if (!$request->is_later) {
             $ride_type = 1;
@@ -150,6 +189,10 @@ class TripRequestTransformer extends Transformer
 
         }
 
+        $params['enable_shipment_load_feature'] = get_settings(Settings::ENABLE_SHIPMENT_LOAD_FEATURE);
+        $params['enable_shipment_unload_feature'] = get_settings(Settings::ENABLE_SHIPMENT_UNLOAD_FEATURE);
+        $params['enable_digital_signature'] = get_settings(Settings::ENABLE_DIGITAL_SIGNATURE);
+
         return $params;
     }
 
@@ -202,4 +245,36 @@ class TripRequestTransformer extends Transformer
         ? $this->item($requestBill, new RequestBillTransformer)
         : $this->null();
     }
+
+     /**
+    * Include the stops of the request.
+    *
+    * @param RequestModel $request
+    * @return \League\Fractal\Resource\Item|\League\Fractal\Resource\NullResource
+    */
+    public function includeRequestStops(RequestModel $request)
+    {
+        $requestStops = $request->requestStops;
+
+        return $requestStops
+        ? $this->collection($requestStops, new RequestStopsTransformer)
+        : $this->null();
+    }
+
+
+    /**
+    * Include the proof of the request.
+    *
+    * @param RequestModel $request
+    * @return \League\Fractal\Resource\Item|\League\Fractal\Resource\NullResource
+    */
+    public function includeRequestProofs(RequestModel $request)
+    {
+        $requestProofs = $request->requestProofs;
+
+        return $requestProofs
+        ? $this->collection($requestProofs, new RequestProofsTransformer)
+        : $this->null();
+    }
+
 }

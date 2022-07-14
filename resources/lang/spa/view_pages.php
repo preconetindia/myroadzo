@@ -352,4 +352,5 @@ return array (
   'add-owner' => 'Add Owner',
   'edit-owner' => 'Edit Owner',
   'delete-owner' => 'Delete Owner',
+  'goods_type_name' => 'Goods type name',
 );

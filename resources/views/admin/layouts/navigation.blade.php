@@ -1,4 +1,3 @@
-
 @php
   
 
@@ -7,7 +6,6 @@ if(str_contains((string)request()->path(),'translations')){
   $sub_menu = 'translations';
 }
 @endphp
-
 <aside class="main-sidebar">
   <!-- sidebar-->
   <section class="sidebar">
@@ -17,19 +15,6 @@ if(str_contains((string)request()->path(),'translations')){
       <li class="{{'dashboard' == $main_menu ? 'active' : '' }}">
         <a href="{{url('/dashboard')}}">
           <i class="fa fa-tachometer"></i> <span>@lang('pages_names.dashboard')</span>
-        </a>
-      </li>
-      @endif
-
-      @if(auth()->user()->can('access-dashboard') && env('APP_FOR')=='demo1')
-      <li class="{{'admin_dashboard' == $main_menu ? 'active' : '' }}">
-        <a href="{{url('/admin_dashboard')}}">
-          <i class="fa fa-tachometer"></i> <span>@lang('pages_names.admin-dashboard')</span>
-        </a>
-      </li>
-      <li class="{{'driver_profile_dashboard' == $main_menu ? 'active' : '' }}">
-        <a href="{{url('/driver_profile_dashboard')}}">
-          <i class="fa fa-tachometer"></i> <span>Driver profile Dashboard</span>
         </a>
       </li>
       @endif
@@ -91,10 +76,15 @@ if(str_contains((string)request()->path(),'translations')){
           </li>
           @endif  
           @if(auth()->user()->can('manage-owner-needed-document'))
-         <!--  <li class="{{ 'owner_needed_document' == $sub_menu ? 'active' : '' }}">
+          <li class="{{ 'owner_needed_document' == $sub_menu ? 'active' : '' }}">
             <a href="{{url('/owner_needed_doc')}}"><i class="fa fa-circle-thin"></i>@lang('pages_names.owner_needed_doc')</a>
-          </li> -->
+          </li>
           @endif 
+          @if(auth()->user()->can('manage-goods-types'))
+                <li class="{{ 'goods_type' == $sub_menu ? 'active' : '' }}">
+                    <a href="{{url('/goods-types')}}"><i class="fa fa-circle-thin"></i>@lang('pages_names.goods_types')</a>
+                </li>
+          @endif
           @if(auth()->user()->can('package-type'))
           <li class="{{ 'package_type' == $sub_menu ? 'active' : '' }}">
             <a href="{{url('/package_type')}}"><i class="fa fa-circle-thin"></i>@lang('pages_names.package_type')</a>
@@ -117,7 +107,7 @@ if(str_contains((string)request()->path(),'translations')){
       @endphp
 
         @if(auth()->user()->can('manage-owner'))
-       <!--  <li class="treeview {{ 'manage_owners' == $main_menu ? 'active menu-open' : '' }}">
+        <li class="treeview {{ 'manage_owners' == $main_menu ? 'active menu-open' : '' }}">
         <a href="javascript: void(0);">
           <i class="fa fa-code-fork"></i>
           <span> @lang('pages_names.owners') </span>
@@ -134,17 +124,17 @@ if(str_contains((string)request()->path(),'translations')){
          </ul>
            
             </li>
-         -->
+        
             @endif
 
     
              @if(auth()->user()->can('manage-fleet'))
-           <!--  <li class="{{ $main_menu == 'manage_fleet' ? 'active' : ''}}">
+            <li class="{{ $main_menu == 'manage_fleet' ? 'active' : ''}}">
                 <a href="{{ route('viewFleet') }}">
                     <i class="fa fa-bus"></i>
                     <span> {{ trans('pages_names.manage_fleet') }} </span>
                 </a>
-            </li> -->
+            </li>
             @endif
 
       @if(auth()->user()->can('admin'))
@@ -216,9 +206,9 @@ if(str_contains((string)request()->path(),'translations')){
           </li>
           @endif
           @if(auth()->user()->can('list-airports'))
-          <li class="{{ 'airport' == $sub_menu ? 'active' : '' }}">
+         <!--  <li class="{{ 'airport' == $sub_menu ? 'active' : '' }}">
             <a href="{{url('/airport')}}"><i class="fa fa-circle-thin"></i>@lang('pages_names.airport')</a>
-          </li>
+          </li> -->
           @endif
         </ul>
       </li>
@@ -257,23 +247,20 @@ if(str_contains((string)request()->path(),'translations')){
             <a href="{{url('/drivers/waiting-for-approval')}}"><i class="fa fa-circle-thin"></i>@lang('pages_names.pending_approvals')</a>
           </li>
           @endif
+          
 
-
-          @if(auth()->user()->can('view-drivers'))
+          @if(auth()->user()->can('view-drivers') && !auth()->user()->hasRole('owner'))
           <li class="{{ 'driver_ratings' == $sub_menu ? 'active' : '' }}">
             <a href="{{url('/driver-ratings')}}"><i class="fa fa-circle-thin"></i>@lang('pages_names.driver_ratings')</a>
           </li>
           @endif
-          @if(auth()->user()->can('view-drivers'))
+          @if(auth()->user()->can('view-drivers') && !auth()->user()->hasRole('owner'))
           <li class="{{ 'withdrawal_requests' == $sub_menu ? 'active' : '' }}">
             <a href="{{url('/withdrawal-requests-lists')}}"><i class="fa fa-circle-thin"></i>@lang('pages_names.withdrawal_requests')</a>
           </li>
-          @endif   
-          @if(auth()->user()->can('view-drivers'))
-          <li class="{{ 'negative_balance_drivers' == $sub_menu ? 'active' : '' }}">
-            <a href="{{url('withdrawal-requests-lists/negative_balance_drivers')}}"><i class="fa fa-circle-thin"></i>@lang('pages_names.negative_balance_drivers')</a>
-          </li>
-          @endif         
+          @endif          
+
+
         </ul> 
        
       </li>

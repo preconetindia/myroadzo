@@ -178,6 +178,7 @@ class AdminController extends BaseController
 
             return redirect('admins')->with('warning', $message);
         }
+        DB::beginTransaction();
 
         $page = trans('pages_names.edit_admin');
 

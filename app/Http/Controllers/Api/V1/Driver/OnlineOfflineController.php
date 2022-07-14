@@ -47,8 +47,7 @@ class OnlineOfflineController extends BaseController
             // get last online availability record
             $availability = $driver->driverAvailabilities()->where('is_online', true)->orderBy('online_at', 'desc')->first();
 
-
-            if ($availability && Carbon::parse($availability->online_at)->toDateString()!=$current_date->toDateString()) {
+            if (Carbon::parse($availability->online_at)->toDateString()!=$current_date->toDateString()) {
                 // Need to create offline record for last online date
                 $created_params['is_online'] = false;
                 // Temporary

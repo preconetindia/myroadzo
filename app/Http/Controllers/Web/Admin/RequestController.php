@@ -37,6 +37,7 @@ class RequestController extends Controller
 
     public function getSingleRequest(RequestRequest $request)
     {
+        // dd($request);
         $page = trans('pages_names.request');
         $main_menu = 'trip-request';
         $sub_menu = 'request';
@@ -75,29 +76,5 @@ class RequestController extends Controller
 
         return view('admin.scheduled-rides._scheduled', compact('results'));
     }
-
-    /**
-     * View Invoice
-     * 
-     * */
-    public function viewCustomerInvoice(RequestRequest $request_detail){
-
-        $data = $request_detail;
-        
-        return view('email.invoice',compact('data'));
-
-    }
-    /**
-     * View Invoice
-     * 
-     * */
-    public function viewDriverInvoice(RequestRequest $request_detail){
-
-        $data = $request_detail;
-        
-        return view('email.driver_invoice',compact('data'));
-
-    }
-
      
 }

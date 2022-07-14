@@ -244,9 +244,6 @@ $(document).on('click','.chooseLanguage',function(){
 
     var link = "<?php echo url('/change/lang')?>";
     var finalLink = link+'/'+langValue;
-
-    console.log(finalLink);
-
     window.location = finalLink;
 });
 </script>
@@ -290,7 +287,7 @@ $(document).on('click','.chooseLanguage',function(){
         firebase.analytics();
 
         var sosRef = firebase.database().ref('SOS');
-        
+
         sosRef.on('value', async function(snapshot) {
             var sosData = snapshot.val();
 

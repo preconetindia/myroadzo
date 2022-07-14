@@ -18,8 +18,8 @@ use App\Http\Requests\Request\CreateTripRequest;
 use App\Transformers\Requests\TripRequestTransformer;
 use Carbon\Carbon;
 use App\Base\Constants\Setting\Settings;
-use Sk\Geohash\Geohash;
 use Kreait\Firebase\Database;
+use Sk\Geohash\Geohash;
 
 /**
  * @group Dispatcher-trips-apis
@@ -30,10 +30,9 @@ class DispatcherCreateRequestController extends BaseController
 {
     protected $request;
 
-    public function __construct(Request $request,Database $database)
+    public function __construct(Request $request)
     {
         $this->request = $request;
-        $this->database = $database;
     }
     /**
     * Create Request
@@ -74,7 +73,7 @@ class DispatcherCreateRequestController extends BaseController
 
         // Get currency code of Request
         $service_location = $zone_type_detail->zone->serviceLocation;
-        $currency_code = $service_location->currency_symbol;
+        $currency_code = get_settings(Settings::CURRENCY);
         //Find the zone using the pickup coordinates & get the nearest drivers
         // $nearest_drivers =  $this->getDrivers($request, $type_id);
         $nearest_drivers =  $this->getFirebaseDrivers($request, $type_id);
@@ -107,7 +106,9 @@ class DispatcherCreateRequestController extends BaseController
             'payment_opt'=>$request->payment_opt,
             'unit'=>$unit,
             'requested_currency_code'=>$currency_code,
-            'service_location_id'=>$service_location->id];
+            'service_location_id'=>$service_location->id,
+            'goods_type_id'=>(integer)$request->goods_type_id
+        ];
 
         // store request details to db
         // DB::beginTransaction();
@@ -120,7 +121,12 @@ class DispatcherCreateRequestController extends BaseController
             'drop_lat'=>$request->drop_lat,
             'drop_lng'=>$request->drop_lng,
             'pick_address'=>$request->pick_address,
-            'drop_address'=>$request->drop_address];
+            'drop_address'=>$request->drop_address,
+            'pickup_poc_name'=>$request->pickup_poc_name,
+            'pickup_poc_mobile'=>$request->pickup_poc_mobile,
+            'drop_poc_name'=>$request->drop_poc_name,
+            'drop_poc_mobile'=>$request->drop_poc_mobile
+        ];
         // store request place details
         $request_detail->requestPlace()->create($request_place_params);
         // $ad_hoc_user_params = $request->only(['name','phone_number']);
@@ -149,6 +155,11 @@ class DispatcherCreateRequestController extends BaseController
 
         // Send notification to the very first driver
         $first_meta_driver = $selected_drivers[0]['driver_id'];
+        
+        // Add first Driver into Firebase Request Meta
+        $this->database->getReference('request-meta/'.$request_detail->id.'/'.$first_meta_driver)->set(['driver_id'=>$first_meta_driver,'request_id'=>$request_detail->id,'user_id'=>$request_detail->user_id,'active'=>1,'updated_at'=> Database::SERVER_TIMESTAMP]);
+
+
         $request_result =  fractal($request_detail, new TripRequestTransformer)->parseIncludes('userDetail');
 
         $mqtt_object = new \stdClass();
@@ -159,7 +170,7 @@ class DispatcherCreateRequestController extends BaseController
         $driver = Driver::find($first_meta_driver);
        
         // Send notify via Mqtt
-        dispatch(new NotifyViaMqtt('create_request_'.$driver->id, json_encode($mqtt_object), $driver->id));
+        // dispatch(new NotifyViaMqtt('delivery_create_request_'.$driver->id, json_encode($mqtt_object), $driver->id));
 
         foreach ($selected_drivers as $key => $selected_driver) {
             $request_detail->requestMeta()->create($selected_driver);
@@ -319,7 +330,7 @@ class DispatcherCreateRequestController extends BaseController
 
         // Get currency code of Request
         $service_location = $zone_type_detail->zone->serviceLocation;
-        $currency_code = get_settings('currency_code');;
+        $currency_code = get_settings(Settings::CURRENCY);
 
         // fetch unit from zone
         $unit = $zone_type_detail->zone->unit;
@@ -352,6 +363,7 @@ class DispatcherCreateRequestController extends BaseController
             'payment_opt'=>$request->payment_opt,
             'unit'=>$unit,
             'requested_currency_code'=>$currency_code,
+            'goods_type_id'=>(integer)$request->goods_type_id,
             'service_location_id'=>$service_location->id];
 
         // store request details to db
@@ -365,7 +377,12 @@ class DispatcherCreateRequestController extends BaseController
             'drop_lat'=>$request->drop_lat,
             'drop_lng'=>$request->drop_lng,
             'pick_address'=>$request->pick_address,
-            'drop_address'=>$request->drop_address];
+            'drop_address'=>$request->drop_address,
+            'pickup_poc_name'=>$request->pickup_poc_name,
+            'pickup_poc_mobile'=>$request->pickup_poc_mobile,
+            'drop_poc_name'=>$request->drop_poc_name,
+            'drop_poc_mobile'=>$request->drop_poc_mobile
+        ];
             // store request place details
             $request_detail->requestPlace()->create($request_place_params);
 

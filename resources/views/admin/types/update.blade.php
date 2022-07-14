@@ -55,7 +55,7 @@
 
         <div class="col-6">
             <div class="form-group m-b-25">
-            <label for="name">@lang('view_pages.capacity') <span class="text-danger">*</span></label>
+            <label for="name">@lang('view_pages.maximum_weight_can_carry') <span class="text-danger">*</span></label>
             <input class="form-control" type="text" id="capacity" name="capacity" value="{{old('capacity',$type->capacity)}}" required="" placeholder="@lang('view_pages.enter_capacity')"  min="1">
             <span class="text-danger">{{ $errors->first('capacity') }}</span>
         </div>
@@ -87,26 +87,17 @@
 
         </div>
     </div>
-                                    <div class="col-6">
-                                        <div class="form-group">
-                                            <label for="transport_type">@lang('view_pages.tansport_type')
-                                                <span class="text-danger">*</span>
-                                            </label>
-                                            <select name="transport_type" id="transport_type" class="form-control" required>
-                                                <option value="">@lang('view_pages.select_tansport_type')</option>
-                                                <option value='male'
-                                                    {{ old('transport_type', $type->is_taxi) == 'taxi' ? 'selected' : '' }}>
-                                                    @lang('view_pages.taxi')</option>
-                                                <option value='fe-male'
-                                                    {{ old('transport_type', $type->is_taxi) == 'fe-male' ? 'selected' : '' }}>
-                                                    @lang('view_pages.delivery')</option>
-                                            </select>
-                                            <span class="text-danger">{{ $errors->first('transport_type') }}</span>
 
-                                        </div>
+    <div class="col-6">
+            <div class="form-group m-b-25">
+            <label for="name">@lang('view_pages.size') <span class="text-danger">*</span></label>
+            <input class="form-control" type="text" id="size" name="size" value="{{old('size',$type->size)}}" required="" placeholder="@lang('view_pages.enter_size')"  min="1">
+            <span class="text-danger">{{ $errors->first('size') }}</span>
+        </div>
+    </div>
 
-                                    </div>
 </div>
+
 
     <div class="form-group">
         <div class="col-6">

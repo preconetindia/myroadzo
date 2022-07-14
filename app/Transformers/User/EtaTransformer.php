@@ -47,6 +47,8 @@ class EtaTransformer extends Transformer
             'description'=> $zone_type->vehicleType->description,
             'short_description'=> $zone_type->vehicleType->short_description,
             'supported_vehicles'=> $zone_type->vehicleType->supported_vehicles,
+            'maimum_weight'=> $zone_type->vehicleType->capacity,
+            'size'=> $zone_type->vehicleType->size,
             'payment_type'=>$zone_type->payment_type,
             'is_default'=>false,
         ];
@@ -179,8 +181,8 @@ class EtaTransformer extends Transformer
         $response['approximate_value'] = 1;
         $response['min_amount'] = $ride->total_price;
         $response['max_amount'] = ($ride->total_price * 1.05);
-        $response['currency'] = get_settings('currency_symbol');
-        $response['currency_name'] = get_settings('currency_code');
+        $response['currency'] = $zone_type->zone->serviceLocation->currency_symbol;
+        $response['currency_name'] = $zone_type->zone->serviceLocation->currency_name;
         $response['type_name'] = $zone_type->vehicleType->name;
         $response['unit'] = $zone_type->unit;
         $response['unit_in_words_without_lang'] = $unit_in_words;
@@ -231,7 +233,7 @@ class EtaTransformer extends Transformer
         if($distance_in_unit < 0 ){
 
             $distance_in_unit = 0;
-        }   
+        }  
 
         $price_per_distance = $type_prices->price_per_distance;
 
@@ -257,10 +259,9 @@ class EtaTransformer extends Transformer
 
         $distance_price = ($distance_in_unit * $price_per_distance);
 
-        /**
-         * OLD FLOW FOR SURGE
-         * 
-         * */
+
+        // $distance_price = ($distance_in_unit * $type_prices->price_per_distance);
+
         // $surgePrice = ZoneSurgePrice::whereZoneId($zone_type->zone_id)->get();
         // $peakValue = 0;
         // foreach ($surgePrice as $surge) {
@@ -274,11 +275,8 @@ class EtaTransformer extends Transformer
         // }
 
         // $distance_price = $distance_price + $peakValue;
-
-
-
-
         // $check_if_peak_time = $this->checkIfPeakTime($zone_type, request()->ride_type);
+        
         $time_price = ($dropoff_time_in_seconds / 60) * $type_prices->price_per_time;
         $base_price = $type_prices->base_price;
         // additon of base and distance price

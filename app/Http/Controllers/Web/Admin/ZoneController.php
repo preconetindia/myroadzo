@@ -84,12 +84,6 @@ class ZoneController extends BaseController
     */
     public function create()
     {
-        if (env('APP_FOR')=='demo') {
-            $message = trans('succes_messages.you_are_not_authorised');
-
-            return redirect('zone')->with('warning', $message);
-        }
-        
         $page = trans('pages_names.add_zone');
 
         $main_menu = 'map';
@@ -107,12 +101,6 @@ class ZoneController extends BaseController
     */
     public function zoneEdit($id)
     {
-        if (env('APP_FOR')=='demo') {
-            $message = trans('succes_messages.you_are_not_authorised');
-
-            return redirect('zone')->with('warning', $message);
-        }
-
         $zone = $this->zone->where('id', $id)->first();
         $page = trans('pages_names.add_zone');
         $main_menu = 'map';
@@ -167,7 +155,7 @@ class ZoneController extends BaseController
         $created_params = $request->only(['unit']);
         $created_params['service_location_id'] = $request->admin_id;
         $set = [];
-
+        
         if($request->coordinates==null){
             throw ValidationException::withMessages(['zone_name' => __('Please Complete the shape before submit')]);
         }
@@ -217,15 +205,17 @@ class ZoneController extends BaseController
     */
     public function update(Zone $zone, CreateZoneRequest $request)
     {
+        
+        if (env('APP_FOR')=='demo') {
+            $message = trans('succes_messages.you_are_not_authorised');
+
+            return redirect('zone')->with('warning', $message);
+        }
+        
         // dd($request->coordinates);
         $updated_params = $request->only(['unit']);
         $updated_params['service_location_id'] = $request->admin_id;
         $set = [];
-
-        if($request->coordinates==null){
-            throw ValidationException::withMessages(['zone_name' => __('Please Complete the shape before submit')]);
-        }
-        
         foreach (json_decode($request->coordinates) as $key => $coordinates) {
             $points = [];
             $lineStrings = [];
@@ -354,33 +344,24 @@ class ZoneController extends BaseController
             'price_type' => zoneRideType::RIDENOW,
             'base_price' => $request->ride_now_base_price,
             'price_per_distance' => $request->ride_now_price_per_distance,
-            'free_waiting_time_in_mins_before_trip_start' => $request->ride_now_free_waiting_time_in_mins_before_trip_start,
-            'free_waiting_time_in_mins_after_trip_start' => $request->ride_now_free_waiting_time_in_mins_after_trip_start,
-            'waiting_charge' => $request->ride_now_waiting_charge,
             'cancellation_fee' => $request->ride_now_cancellation_fee,
             'base_distance' => $request->ride_now_base_distance ? $request->ride_now_base_distance : 0,
             'price_per_time' => $request->ride_now_price_per_time ? $request->ride_now_price_per_time : 0.00,
-            // 'admin_service_fee' => $request->ride_now_admin_service_fee ? $request->ride_now_admin_service_fee : 0.00,
-            // 'admin_service_fee_type' => $request->ride_now_admin_service_fee_type ? $request->ride_now_admin_service_fee_type : 0
         ]);
 
         $zoneType->zoneTypePrice()->create([
             'price_type' => zoneRideType::RIDELATER,
             'base_price' => $request->ride_later_base_price,
             'price_per_distance' => $request->ride_later_price_per_distance,
-            'free_waiting_time_in_mins_before_trip_start' => $request->ride_later_free_waiting_time_in_mins_before_trip_start,
-            'free_waiting_time_in_mins_after_trip_start' => $request->ride_later_free_waiting_time_in_mins_after_trip_start,
-            'waiting_charge' => $request->ride_later_waiting_charge,
             'cancellation_fee' => $request->ride_later_cancellation_fee,
             'base_distance' => $request->ride_later_base_distance ? $request->ride_later_base_distance : 0,
             'price_per_time' => $request->ride_later_price_per_time ? $request->ride_later_price_per_time : 0.00,
-            // 'admin_service_fee' => $request->ride_later_admin_service_fee ? $request->ride_later_admin_service_fee : 0.00,
-            // 'admin_service_fee_type' => $request->ride_later_admin_service_fee_type ? $request->ride_later_admin_service_fee_type : 0
         ]);
 
         $message = trans('succes_messages.type_assigned_succesfully');
 
-        return redirect('zone/assigned/types/'.$zone->id)->with('success', $message);    }
+        return redirect('zone/assigned/types/'.$zone->id)->with('success', $message);
+    }
 
     /**
     * Zone Delete
@@ -418,7 +399,7 @@ class ZoneController extends BaseController
      */
     public function typesPriceUpdate(AssignZoneTypeRequest $request, ZoneType $zone_type)
     {
-         $zone_type->update([
+        $zone_type->update([
             'payment_type' => implode(',', $request->payment_type),
             'bill_status' => true
         ]);
@@ -426,33 +407,23 @@ class ZoneController extends BaseController
         $zone_type->zoneTypePrice()->where('price_type', zoneRideType::RIDENOW)->update([
             'base_price' => $request->ride_now_base_price,
             'price_per_distance' => $request->ride_now_price_per_distance,
-             'free_waiting_time_in_mins_before_trip_start' => $request->ride_now_free_waiting_time_in_mins_before_trip_start,
-            'free_waiting_time_in_mins_after_trip_start' => $request->ride_now_free_waiting_time_in_mins_after_trip_start,
-            'waiting_charge' => $request->ride_now_waiting_charge,
             'cancellation_fee' => $request->ride_now_cancellation_fee,
             'base_distance' => $request->ride_now_base_distance ? $request->ride_now_base_distance : 0,
             'price_per_time' => $request->ride_now_price_per_time ? $request->ride_now_price_per_time : 0.00,
-            // 'admin_service_fee' => $request->ride_now_admin_service_fee ? $request->ride_now_admin_service_fee : 0.00,
-            // 'admin_service_fee_type' => $request->ride_now_admin_service_fee_type ? $request->ride_now_admin_service_fee_type : 0
+            
         ]);
 
         $zone_type->zoneTypePrice()->where('price_type', zoneRideType::RIDELATER)->update([
             'base_price' => $request->ride_later_base_price,
             'price_per_distance' => $request->ride_later_price_per_distance,
-            'free_waiting_time_in_mins_before_trip_start' => $request->ride_later_free_waiting_time_in_mins_before_trip_start,
-            'free_waiting_time_in_mins_after_trip_start' => $request->ride_later_free_waiting_time_in_mins_after_trip_start,
-            'waiting_charge' => $request->ride_later_waiting_charge,
             'cancellation_fee' => $request->ride_later_cancellation_fee,
             'base_distance' => $request->ride_later_base_distance ? $request->ride_later_base_distance : 0,
             'price_per_time' => $request->ride_later_price_per_time ? $request->ride_later_price_per_time : 0.00,
-            // 'admin_service_fee' => $request->ride_later_admin_service_fee ? $request->ride_later_admin_service_fee : 0.00,
-            // 'admin_service_fee_type' => $request->ride_later_admin_service_fee_type ? $request->ride_later_admin_service_fee_type : 0
         ]);
 
         $message = trans('succes_messages.type_assigned_succesfully');
 
         return redirect('zone/assigned/types/'.$zone_type->zone_id)->with('success', $message);
-    
     }
 
 

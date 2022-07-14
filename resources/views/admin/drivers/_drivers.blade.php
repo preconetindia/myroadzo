@@ -1,4 +1,4 @@
-<div class="box-body">
+<div class="box-body no-padding">
     <div class="table-responsive">
       <table class="table table-hover">
 <thead>
@@ -84,7 +84,7 @@
 <!-- @if($result->active)
 <td><button class="btn btn-success btn-sm">{{ trans('view_pages.active') }}</button></td>
 @else
-<td><button class="btn btn-danger btn-sm">{{ trans('view_pages.iniive') }}</button></td>
+<td><button class="btn btn-danger btn-sm">{{ trans('view_pages.inactive') }}</button></td>
 @endif -->
 
 @if($result->approve)
@@ -117,11 +117,11 @@
             @endforeach 
 
 <td>
-
+<div class="dropdown">
 <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">@lang('view_pages.action')
 </button>
 @if($result->approve == 1)
-    <div class="dropdown-menu w-48 ">
+    <div class="dropdown-menu">
         <a class="dropdown-item" href="{{url('drivers',$result->id)}}">
             <i class="fa fa-pencil"></i>@lang('view_pages.edit')
         </a>

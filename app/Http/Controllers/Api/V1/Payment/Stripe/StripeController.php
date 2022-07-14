@@ -45,14 +45,16 @@ class StripeController extends ApiController
      */
     public function createStripeIntent(Request $request){
 
-           if(get_settings(Settings::STRIPE_ENVIRONMENT)=='test'){
+
+        if(get_settings(Settings::STRIPE_ENVIRONMENT)=='test'){
 
             $secret_key = get_settings(Settings::STRIPE_TEST_SECRET_KEY);
+
+            \Stripe\Stripe::setApiKey($secret_key);
 
             $test_environment = true;
 
 
-            \Stripe\Stripe::setApiKey($secret_key);
         }else{
 
             $secret_key = get_settings(Settings::STRIPE_LIVE_SECRET_KEY);
@@ -61,9 +63,8 @@ class StripeController extends ApiController
 
             $test_environment = false;
 
-
-
         }
+
 
         $user = auth()->user();
 
@@ -85,7 +86,7 @@ class StripeController extends ApiController
         $customer = \Stripe\Customer::create($create_customer_data);
 
 
-            $user_currency_code = get_settings('currency_code');
+            $user_currency_code = get_settings(Settings::CURRENCY);
 
             $setup_intent = \Stripe\PaymentIntent::create([
                 'amount' => $request->amount *100,
@@ -137,7 +138,17 @@ class StripeController extends ApiController
     */
     public function addMoneyToWallet(AddMoneyToWalletRequest $request)
     {
-            $transaction_id = $request->payment_id;
+        
+        $user_currency_code = get_settings(Settings::CURRENCY);
+
+        // Convert the amount to USD to any currency
+        // $converted_amount_array =  convert_currency_to_usd($user_currency_code, $request->input('amount'));
+
+        // $converted_amount = $converted_amount_array['converted_amount'];
+        // $converted_type = $converted_amount_array['converted_type'];
+
+        // $conversion = $converted_type.':'.$request->amount.'-'.$converted_amount;
+        $transaction_id = $request->payment_id;
             $user = auth()->user();
         
             if (access()->hasRole('user')) {
@@ -175,7 +186,7 @@ class StripeController extends ApiController
                 $title = trans('push_notifications.amount_credited_to_your_wallet_title');
                 $body = trans('push_notifications.amount_credited_to_your_wallet_body');
 
-                dispatch(new NotifyViaMqtt('add_money_to_wallet_status'.$user_id, json_encode($socket_data), $user_id));
+                // dispatch(new NotifyViaMqtt('delivery_add_money_to_wallet_status'.$user_id, json_encode($socket_data), $user_id));
                 
                 $user->notify(new AndroidPushNotification($title, $body));
 

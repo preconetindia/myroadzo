@@ -85,8 +85,8 @@ class DriverEndRequestController extends BaseController
         // Get currency code of Request
         $service_location = $request_detail->zoneType->zone->serviceLocation;
 
-        $currency_code = get_settings('currency_code');
-        $requested_currency_symbol = get_settings('currency_symbol');
+        $currency_code = get_settings(Settings::CURRENCY);
+        $requested_currency_symbol = get_settings(Settings::CURRENCY_SYMBOL);
 
         if (!$request_detail->is_later) {
             $ride_type = 1;
@@ -148,7 +148,7 @@ class DriverEndRequestController extends BaseController
         if ($request_detail->promo_id) {
             $promo_detail = $this->validateAndGetPromoDetail($request_detail->promo_id);
         }
-
+        
         $calculated_bill =  $this->calculateRideFares($zone_type_price, $distance, $duration, $waiting_time, $promo_detail,$request_detail);
 
         $calculated_bill['before_trip_start_waiting_time'] = $before_trip_start_waiting_time;
@@ -311,7 +311,7 @@ class DriverEndRequestController extends BaseController
         // $socket_message = structure_for_socket($user->id, 'user', $socket_data, 'trip_status');
         // dispatch(new NotifyViaSocket('transfer_msg', $socket_message));
 
-        dispatch(new NotifyViaMqtt('trip_status_'.$user->id, json_encode($socket_data), $user->id));
+        // dispatch(new NotifyViaMqtt('delivery_trip_status_'.$user->id, json_encode($socket_data), $user->id));
 
         $user->notify(new AndroidPushNotification($title, $body));
         dispatch_notify:
@@ -382,7 +382,6 @@ class DriverEndRequestController extends BaseController
         }
 
         $distance_price = $calculatable_distance * $price_per_distance;
-
         // Time Price
         $time_price = $duration * $zone_type_price->price_per_time;
         // Waiting charge
@@ -440,12 +439,15 @@ class DriverEndRequestController extends BaseController
         }
 
         $discount_amount = 0;
+
         if ($coupon_detail) {
             if ($coupon_detail->minimum_trip_amount < $sub_total) {
+
                 $discount_amount = $sub_total * ($coupon_detail->discount_percent/100);
                 if ($discount_amount > $coupon_detail->maximum_discount_amount) {
                     $discount_amount = $coupon_detail->maximum_discount_amount;
                 }
+            
                 $sub_total = $sub_total - $discount_amount;
             }
         }
@@ -454,19 +456,9 @@ class DriverEndRequestController extends BaseController
         $tax_percent = get_settings('service_tax');
         $tax_amount = ($sub_total * ($tax_percent / 100));
         // Get Admin Commision
-        $admin_commision_type = get_settings('admin_commission_type');
-
         $service_fee = get_settings('admin_commission');
         // Admin commision
-        if($admin_commision_type==1){
-
         $admin_commision = ($sub_total * ($service_fee / 100));
-
-        }else{
-            
-            $admin_commision = $service_fee;
-
-        }
         // Admin commision with tax amount
         $admin_commision_with_tax = $tax_amount + $admin_commision;
         $driver_commision = $sub_total+$discount_amount;  
@@ -596,7 +588,7 @@ class DriverEndRequestController extends BaseController
 
         $discount_amount = 0;
 
-         if ($coupon_detail) {
+        if ($coupon_detail) {
             if ($coupon_detail->minimum_trip_amount < $sub_total) {
 
                 $discount_amount = $sub_total * ($coupon_detail->discount_percent/100);
@@ -614,16 +606,7 @@ class DriverEndRequestController extends BaseController
         // Get Admin Commision
         $service_fee = get_settings('admin_commission');
         // Admin commision
-        // Admin commision
-        if($admin_commision_type==1){
-
         $admin_commision = ($sub_total * ($service_fee / 100));
-
-        }else{
-            
-            $admin_commision = $service_fee;
-
-        }
         // Admin commision with tax amount
         $admin_commision_with_tax = $tax_amount + $admin_commision;
         $driver_commision = $sub_total+$discount_amount;  
@@ -666,9 +649,13 @@ class DriverEndRequestController extends BaseController
 
         $expired = Promo::where('id', $promo_code_id)->where('from', '<=', $current_date)->orWhere('to', '>=', $current_date)->first();
 
-        
+
+        if ($expired==null) {
+
+            return null;
+        }
+
         return $expired;
-        
         // $exceed_usage = PromoUser::where('promo_code_id', $expired->id)->where('user_id', $user_id)->get()->count();
 
         // if ($exceed_usage >= $expired->uses_per_user) {

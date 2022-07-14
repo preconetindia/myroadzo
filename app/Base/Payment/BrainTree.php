@@ -148,7 +148,7 @@ class BrainTree implements PaymentInterface
     */
     public function addMoneyToWallet(Request $request)
     {
-        $user_currency_code = get_settings('currency_code');
+        $user_currency_code = get_settings(Settings::CURRENCY);
 
         // dd($user_currency_code);
 

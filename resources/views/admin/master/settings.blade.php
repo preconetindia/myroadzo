@@ -74,8 +74,8 @@
                                     <div class="form-group">
                                         <label for="title">
                                             {{trans('view_pages.'.$setting_name['name'])}}
-                                            <span class="text-danger">*</span>
-                                        </label>
+<!--                                             <span class="text-danger">*</span>
+ -->                                        </label>
 
                                         <?php
                       /*select box*/    if ($setting_name['field']=="select") { ?>
@@ -95,6 +95,9 @@
                                         <?php }
                       /*text box*/      elseif ($setting_name['field']=="text") { ?>
                                         <input name="<?=$setting_name['name'];?>" type="text" value='<?=$setting_name['value']?>' class="form-control" id="title">
+                                        <?php }
+                                          elseif ($setting_name['field']=="password") { ?>
+                                        <input name="<?=$setting_name['name'];?>" type="password" value='<?=$setting_name['value']?>' class="form-control" id="title">
                                         <?php }
                       /*image box*/     elseif ($setting_name['field']=="file") { ?>
                                         {{-- <div class="imageupload panel panel-default">

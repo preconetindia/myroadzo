@@ -51,8 +51,8 @@
         </div>
     </div>
 
-    <!-- <input type="hidden" name="currency_name" id="currency_name"> -->
-<!-- 
+<!--     <input type="hidden" name="currency_name" id="currency_name">
+
     <div class="col-sm-6">
             <div class="form-group">
             <label for="currency_code">@lang('view_pages.currency_code') <span class="text-danger">*</span></label>

@@ -23,6 +23,11 @@ td {
     font-weight: 800;
     font-size: large;
 }
+
+.max-h{
+max-height: 200px;
+}
+
 </style>
 <!-- Start Page content -->
 <section class="content">
@@ -83,6 +88,8 @@ td {
                                 <th>@lang('view_pages.zone')</th>
                                 <th>@lang('view_pages.type')</th>
                                 <th>@lang('view_pages.trip_time')</th>
+                                <th>@lang('view_pages.goods_type_and_quantity')</th>
+
                             </tr>
                         </thead>
                         <tbody>
@@ -90,6 +97,8 @@ td {
                                 <td>{{ $item->zoneType->zone->name }}</td>
                                 <td>{{ $item->zoneType->vehicleType->name }}</td>
                                 <td>{{ $item->trip_start_time }}</td>
+                                <td>{{ $item->goodsTypeDetail->goods_type_name }} - {{$item->goods_type_quantity }}</td>
+
                             </tr>
                         </tbody>
                     </table>
@@ -206,6 +215,20 @@ td {
                     </table>
                 </div>
             </div>
+
+            <div class="box">
+                <div class="box-header bb-2 border-primary">
+                    <h3 class="box-title">@lang('view_pages.delivery_proof')</h3>
+                </div>
+
+                <div class="box-body">
+                    @foreach ($item->requestProofs as $key => $proof)
+                    <img class="max-h" src="{{ $proof->proof_image }}" alt="">
+                    @endforeach
+                </div>
+
+            </div>
+
             @endif
 
         </div>

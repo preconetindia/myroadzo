@@ -108,8 +108,8 @@
 
 </div>
 <!-- content -->
-<!-- 
-<script type="text/javascript"> 
+
+<!-- <script type="text/javascript"> 
 function changeCurrencyByCountry(){
     var id = $('#country').val();
 

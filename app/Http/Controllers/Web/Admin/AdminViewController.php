@@ -21,7 +21,6 @@ use App\Models\Payment\DriverWallet;
 use Kreait\Firebase\Database;
 use App\Base\Constants\Setting\Settings;
 
-
 class AdminViewController extends BaseController
 {
 
@@ -39,13 +38,13 @@ class AdminViewController extends BaseController
 
         $conditional_host = explode('.',$host_name);
 
-        if($conditional_host[0] =='tagxi-docs'){
+        if($conditional_host[0] =='delivery-docs'){
 
-        return redirect('user-manual');
+            return redirect('user-manual');
 
         }
         
-        if($conditional_host[0] =='tagxi-server'){
+        if($conditional_host[0] =='delivery-admin'){
 
             $user = User::belongsToRole('super-admin')->first();
 
@@ -56,10 +55,10 @@ class AdminViewController extends BaseController
 
         }
         
-        if($conditional_host[0] =='tagxi-dispatch'){
+        if($conditional_host[0] =='delivery-dispatch'){
 
         $user = User::belongsToRole('dispatcher')->first();
-        
+
         auth('web')->login($user, true);
 
         return redirect('dispatch/dashboard');
@@ -92,13 +91,14 @@ class AdminViewController extends BaseController
 
         $sub_menu = null;
         $item = $driver;
+
         // $request_detail = $driver->requestDetail()->OrderBy('id','asc')->first();
        
         // if ($request_detail) {
             
         $firebase_request_detail = $this->database->getReference('drivers/'.$driver->id)->getValue();
         $zone = Zone::companyKey()->first();
-        // dd($firebase_request_detail);
+
         // $default_lat = $firebase_request_detail["l"][0];
         // $default_lng = $firebase_request_detail["l"][1];
 
@@ -107,8 +107,13 @@ class AdminViewController extends BaseController
 
         $today = date('Y-m-d');
 
-        $currency = get_settings('currency_symbol');
-        // dd($currency);
+        // if (auth()->user()->countryDetail) {
+        //     $currency = get_settings(Settings::CURRENCY_SYMBOL);
+        // } else {
+        //     $currency = env('SYSTEM_DEFAULT_CURRENCY');
+        // }
+
+        $currency = get_settings(Settings::CURRENCY_SYMBOL);
 
         //card
         $totalTrips = Request::where('driver_id',$driver->id)->companyKey()->whereIsCompleted(true)->count();
@@ -317,10 +322,7 @@ class AdminViewController extends BaseController
     public function dashboard()
     {
         // set default locale if none selected @TODO
-
-        if(!Session::get('applocale')){
-            Session::put('applocale', 'en');
-        }
+        Session::put('applocale', 'en');
 
         
         $page = trans('pages_names.dashboard');
@@ -464,7 +466,14 @@ class AdminViewController extends BaseController
          $overall_earning_wallet_percent =0;
         }
 
-        $currency = get_settings('currency_symbol');
+        // $currency = auth()->user()->countryDetail->currency_code ?: env('SYSTEM_DEFAULT_CURRENCY');
+        // if (auth()->user()->countryDetail) {
+        //     $currency = get_settings(Settings::CURRENCY_SYMBOL);
+        // } else {
+        //     $currency = env('SYSTEM_DEFAULT_CURRENCY');
+        // }
+
+        $currency = get_settings(Settings::CURRENCY_SYMBOL);
         
 
      

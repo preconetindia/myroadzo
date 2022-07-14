@@ -258,5 +258,4 @@ class Driver extends Model
         $rate=  User::where('id',$user_id)->first();
         return $rate->rating;
     }
-
 }

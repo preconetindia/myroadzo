@@ -199,8 +199,8 @@ class PaymentController extends BaseController
             $user_wallet = auth()->user()->userWallet;
 
             $wallet_balance= $user_wallet->amount_balance;
-            $currency_code = get_settings('currency_code');
-            $currency_symbol = get_settings('currency_symbol');
+            $currency_code = auth()->user()->countryDetail->currency_code;
+            $currency_symbol = get_settings(Settings::CURRENCY_SYMBOL);
             $default_card = CardInfo::where('user_id', auth()->user()->id)->where('is_default', true)->first();
             $default_card_id = null;
             if ($default_card) {
@@ -214,8 +214,8 @@ class PaymentController extends BaseController
             $driver_wallet = auth()->user()->driver->driverWallet;
 
             $wallet_balance= $driver_wallet->amount_balance;
-            $currency_code = get_settings('currency_code');
-            $currency_symbol = get_settings('currency_symbol');
+            $currency_code = auth()->user()->countryDetail->currency_code;
+            $currency_symbol = get_settings(Settings::CURRENCY_SYMBOL);
 
             $default_card = CardInfo::where('user_id', auth()->user()->id)->where('is_default', true)->first();
             $default_card_id = null;
@@ -333,7 +333,7 @@ class PaymentController extends BaseController
 
 
         ]);
-        
+
         // return $this->respondSuccess($result, 'wallet_history_listed');
     }
 
@@ -392,7 +392,7 @@ class PaymentController extends BaseController
 
             $user_info = auth()->user();
 
-            $currency_code = get_settings('currency_code');
+            $currency_code = auth()->user()->countryDetail?get_settings(Settings::CURRENCY_SYMBOL):env('SYSTEM_DEFAULT_CURRENCY');
 
             $created_params['requested_currency'] = $currency_code;
             $created_params['user_id'] = auth()->user()->id;
@@ -400,14 +400,9 @@ class PaymentController extends BaseController
             $user_wallet = auth()->user()->userWallet;
             $wallet_balance= $user_wallet->amount_balance;
 
-            if($wallet_balance <=0){
-
-                $this->throwCustomException('Your wallet balance is too low');
-
-            }
             if($wallet_balance < $request->requested_amount){
 
-                $this->throwCustomException('Your wallet balance is too low than your requested amount');
+                $this->throwCustomException('Yout wallet balance is too low than your requested amount');
 
             }
 
@@ -420,7 +415,7 @@ class PaymentController extends BaseController
             
             $user_info = auth()->user()->driver;
 
-            $currency_code = get_settings('currency_symbol');
+            $currency_code = auth()->user()->driver->serviceLocation->currency_symbol;
 
             $created_params['requested_currency'] = $currency_code;
             $created_params['driver_id'] = auth()->user()->driver->id;

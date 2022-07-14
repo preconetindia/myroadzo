@@ -16,11 +16,11 @@
     <span style="float: right;">
     </span>
     </th>
-    <th> @lang('view_pages.timezone')
+    <th> @lang('view_pages.currency_symbol')
     <span style="float: right;">
     </span>
     </th>
-    <!-- <th>@lang('view_pages.currency_code')</th> -->
+    <th>@lang('view_pages.currency_code')</th>
     <th> @lang('view_pages.status')
     <span style="float: right;">
     </span>
@@ -41,15 +41,17 @@
     <tr>
     <td>{{ $i++ }} </td>
     <td>{{$result->name}}</td>
-    <td>{{$result->timezone}}</td>
+    <td>{{$result->currency_symbol}}</td>
+    <td>{{$result->currency_code}}</td>
     @if($result->active)
-    <td><span class="label label-success">Active</span></td>
+    <td><span class="label label-success">@lang('view_pages.active')</span></td>
     @else
-    <td><span class="label label-danger">InActive</span></td>
+    <td><span class="label label-danger">@lang('view_pages.inactive')</span></td>
     @endif
     <td>
 
     @if(env('APP_FOR')!='demo')
+    <div class="dropdown">
     <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">@lang('view_pages.action')
     </button>
         <div class="dropdown-menu">

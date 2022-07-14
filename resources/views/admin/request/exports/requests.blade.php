@@ -2,16 +2,17 @@
     <thead>
         <tr>
             <th> @lang('view_pages.s_no')</th>
-            <th> @lang('view_pages.date')</th>
             <th> @lang('view_pages.request_id')</th>
-            <th> Trip Start Time</th>
-            <th> Trip End Time</th>
+            <th> @lang('view_pages.trip_start_time')</th>
+            <th> @lang('view_pages.trip_end_time')</th>
             <th> @lang('view_pages.user_name')</th>
             <th> @lang('view_pages.driver_name')</th>
             <th> @lang('view_pages.trip_status')</th>
             <th> @lang('view_pages.is_paid_status')</th>
             <th> @lang('view_pages.payment_option')</th>
             <th> @lang('view_pages.vehicle_type')</th>
+
+            <th> @lang('view_pages.goods_type_and_quantity')</th>
             <th> @lang('view_pages.ride_type')</th> 
 
             <th> @lang('view_pages.trip_time')</th>
@@ -28,7 +29,6 @@
         @forelse($results as $key => $result)
             <tr>
                 <td>{{ $i++ }} </td>
-                <td>{{ $result->created_at->format("m/d/Y") }} </td>
                 <td>{{$result->request_number}}</td>
                 <td>{{ $result->converted_trip_start_time ?? '-' }}</td>
                 <td>{{ $result->converted_completed_at ?? '-' }}</td>
@@ -63,6 +63,8 @@
 
                 <td>{{ $result->vehicle_type_name }}</td>
 
+                <td>{{ $result->goodsTypeDetail->goods_type_name }} - {{$result->goods_type_quantity }}
+                    </td>
 
             @php
                $later = $result->is_later;  
@@ -71,17 +73,17 @@
              @if($later == 0)
 
                 @if(($later == 0) &&  ($rental == 0))           
-                <td><span class="label label-success"> Regular-Instant </span> </td>
+                <td><span class="label label-success"> @lang('view_pages.regular_instant') </span> </td>
                 @else(($later == 0) &&  ($rental == 1)) 
-                <td><span class="label label-success"> Rental-Instant </span> </td>
+                <td><span class="label label-success"> @lang('view_pages.rental_instant') </span> </td>
                 @endif
 
             @else($later == 1)
                
                 @if(($later == 1) &&  ($rental == 0))           
-                <td><span class="label label-success"> Regular-Scheduled </span></td>
+                <td><span class="label label-success">  @lang('view_pages.regular_scheduled')</span></td>
                 @else(($later == 1) &&  ($rental == 1 )) 
-                <td><span class="label label-success"> Rental-Scheduled </span></td>
+                <td><span class="label label-success"> @lang('view_pages.rental_scheduled')</span></td>
                 @endif
                
             @endif

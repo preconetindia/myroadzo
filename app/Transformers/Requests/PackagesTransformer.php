@@ -85,7 +85,7 @@ class PackagesTransformer extends Transformer
                 'name'=>$type->vehicle_type_name,
                 'icon'=>$type->icon,
                 'capacity'=>$type->vehicleType->capacity,
-                'currency'=> get_settings('currency_symbol'),
+                'currency'=> $type->zone->serviceLocation->currency_symbol,
                 'unit' => $type->zone->unit,
                 'unit_in_words' => $type->zone->unit ? 'Km' : 'Miles',
                 'distance_price_per_km'=>$prices->distance_price_per_km,
@@ -116,10 +116,7 @@ class PackagesTransformer extends Transformer
             $zone_types[$key]['discounted_totel'] = $coupon_applied_sub_total;
 
             $zone_types[$key]['has_discount'] = true;
-            
             $zone_types[$key]['promocode_id'] = $coupon_detail->id;
-
-
             }else{
             // $this->throwCustomException('promo cannot be used to your trip amount');
 
@@ -154,13 +151,13 @@ class PackagesTransformer extends Transformer
         if (!$expired) {
             $this->throwCustomException('provided promo code expired or invalid');
         }
-        // $exceed_usage = PromoUser::where('promo_code_id', $expired->id)->where('user_id', $user->id)->get()->count();
-        // if ($exceed_usage >= $expired->uses_per_user) {
-        //     $this->throwCustomException('you have exceeded your limit for this promo');
-        // }
-        // if ($expired->total_uses > $expired->total_uses+1) {
-        //     $this->throwCustomException('provided promo code expired');
-        // }
+        $exceed_usage = PromoUser::where('promo_code_id', $expired->id)->where('user_id', $user->id)->get()->count();
+        if ($exceed_usage >= $expired->uses_per_user) {
+            $this->throwCustomException('you have exceeded your limit for this promo');
+        }
+        if ($expired->total_uses > $expired->total_uses+1) {
+            $this->throwCustomException('provided promo code expired');
+        }
         return $expired;
     }
 }

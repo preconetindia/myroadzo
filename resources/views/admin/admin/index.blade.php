@@ -33,6 +33,7 @@
                                     @lang('view_pages.search')
                                 </button>
                             </div>
+
                             @if(env('APP_FOR')!='demo')
                             <div class="col-md-7 text-center text-md-right">
                                 <a href="{{ url('admins/create') }}" class="btn btn-primary btn-sm">
@@ -48,7 +49,7 @@
 
                     <div id="js-admin-partial-target">
                         <include-fragment src="admins/fetch">
-                            <span style="text-align: center;font-weight: bold;"> Loading...</span>
+                            <span style="text-align: center;font-weight: bold;">@lang('view_pages.loading') </span>
                         </include-fragment>
                     </div>
 

@@ -16,6 +16,7 @@ use App\Transformers\Payment\DriverWalletHistoryTransformer;
 use App\Models\Payment\UserWallet;
 use App\Models\Payment\DriverWallet;
 use App\Base\Constants\Masters\WalletRemarks;
+use App\Base\Constants\Setting\Settings;
 
 
 /**
@@ -48,7 +49,16 @@ class PaymobController extends ApiController
     public function addMoneyToWallet(AddMoneyToWalletRequest $request)
     {
         
-         $transaction_id = $request->payment_id;
+        $user_currency_code = get_settings(Settings::CURRENCY);
+
+        // Convert the amount to USD to any currency
+        // $converted_amount_array =  convert_currency_to_usd($user_currency_code, $request->input('amount'));
+
+        // $converted_amount = $converted_amount_array['converted_amount'];
+        // $converted_type = $converted_amount_array['converted_type'];
+
+        // $conversion = $converted_type.':'.$request->amount.'-'.$converted_amount;
+        $transaction_id = $request->payment_id;
 
             if (access()->hasRole('user')) {
             $wallet_model = new UserWallet();
